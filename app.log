@@ -1,0 +1,38 @@
+2025-10-02 16:30:30,243 - src.devaito.db.session - INFO - Creating new engine for tenant: donotremove
+2025-10-02 16:30:30,243 - src.devaito.db.session - INFO - Creating engine for tenant 'donotremove' with pool config: size=5, max_overflow=10, timeout=30s, recycle=3600s
+2025-10-02 16:30:30,309 - src.devaito.db.session - DEBUG - Active engines: ['donotremove']
+2025-10-02 16:30:30,310 - src.devaito.db.session - INFO - Creating new engine for tenant: picksssss
+2025-10-02 16:30:30,310 - src.devaito.db.session - INFO - Creating engine for tenant 'picksssss' with pool config: size=5, max_overflow=10, timeout=30s, recycle=3600s
+2025-10-02 16:30:30,311 - src.devaito.db.session - DEBUG - Active engines: ['donotremove', 'picksssss']
+2025-10-02 16:30:30,614 - src.devaito.db.session - ERROR - Database error for tenant donotremove: (pymysql.err.OperationalError) (1698, "Access denied for user 'root'@'localhost'")
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-10-02 16:30:30,616 - src.devaito.db.session - INFO - Disposing engine for tenant: donotremove
+2025-10-02 16:30:30,697 - src.devaito.db.session - ERROR - Database error for tenant picksssss: (pymysql.err.OperationalError) (1698, "Access denied for user 'root'@'localhost'")
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-10-02 16:30:30,698 - src.devaito.db.session - INFO - Disposing engine for tenant: picksssss
+2025-10-02 16:34:26,258 - src.devaito.db.session - INFO - Creating new engine for tenant: donotremove
+2025-10-02 16:34:26,258 - src.devaito.db.session - INFO - Creating engine for tenant 'donotremove' with pool config: size=5, max_overflow=10, timeout=30s, recycle=3600s
+2025-10-02 16:34:26,281 - src.devaito.db.session - DEBUG - Active engines: ['donotremove']
+2025-10-02 16:34:26,282 - src.devaito.db.session - INFO - Creating new engine for tenant: picksssss
+2025-10-02 16:34:26,282 - src.devaito.db.session - INFO - Creating engine for tenant 'picksssss' with pool config: size=5, max_overflow=10, timeout=30s, recycle=3600s
+2025-10-02 16:34:26,282 - src.devaito.db.session - DEBUG - Active engines: ['donotremove', 'picksssss']
+2025-10-02 16:34:26,549 - src.devaito.db.session - ERROR - Database error for tenant donotremove: (pymysql.err.OperationalError) (1698, "Access denied for user 'root'@'localhost'")
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-10-02 16:34:26,551 - src.devaito.db.session - INFO - Disposing engine for tenant: donotremove
+2025-10-02 16:34:26,633 - src.devaito.db.session - ERROR - Database error for tenant picksssss: (pymysql.err.OperationalError) (1698, "Access denied for user 'root'@'localhost'")
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-10-02 16:34:26,634 - src.devaito.db.session - INFO - Disposing engine for tenant: picksssss
+2025-10-02 16:35:45,406 - src.devaito.db.session - INFO - Creating new engine for tenant: donotremove
+2025-10-02 16:35:45,406 - src.devaito.db.session - INFO - Creating engine for tenant 'donotremove' with pool config: size=5, max_overflow=10, timeout=30s, recycle=3600s
+2025-10-02 16:35:45,429 - src.devaito.db.session - DEBUG - Active engines: ['donotremove']
+2025-10-02 16:35:45,430 - src.devaito.db.session - INFO - Creating new engine for tenant: picksssss
+2025-10-02 16:35:45,430 - src.devaito.db.session - INFO - Creating engine for tenant 'picksssss' with pool config: size=5, max_overflow=10, timeout=30s, recycle=3600s
+2025-10-02 16:35:45,430 - src.devaito.db.session - DEBUG - Active engines: ['donotremove', 'picksssss']
+2025-10-02 16:35:47,525 - src.devaito.db.session - DEBUG - Active engines: ['donotremove', 'picksssss']
+2025-10-02 16:35:47,610 - src.devaito.db.session - DEBUG - Active engines: ['donotremove', 'picksssss']
+2025-10-02 16:35:48,209 - src.devaito.db.session - DEBUG - Active engines: ['donotremove', 'picksssss']
+2025-10-02 16:35:48,295 - src.devaito.db.session - DEBUG - Active engines: ['donotremove', 'picksssss']
+2025-10-02 16:35:48,880 - src.devaito.db.session - DEBUG - Active engines: ['donotremove', 'picksssss']
+2025-10-02 16:35:48,966 - src.devaito.db.session - DEBUG - Active engines: ['donotremove', 'picksssss']
+2025-10-02 16:35:49,562 - src.devaito.db.session - INFO - Disposing engine for tenant: donotremove
+2025-10-02 16:35:49,651 - src.devaito.db.session - INFO - Disposing engine for tenant: picksssss
