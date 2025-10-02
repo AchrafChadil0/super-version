@@ -9,6 +9,7 @@ from .category import Category
 from .color import Color
 from .custom_product_details import CustomizableProductDetail
 from .product import Product
+from .ProductForVector import ProductForVector
 
 __all__ = [
     "Category",
@@ -18,6 +19,7 @@ __all__ = [
     "BasicSingleProductDetail",
     "BasicVariantProductDetail",
     "CustomizableProductDetail",
+    "ProductForVector",
     # Associations
     "product_color_association",
     "product_category_association",

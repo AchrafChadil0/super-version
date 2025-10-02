@@ -112,3 +112,14 @@ class CustomizableProductDetailDict(TypedDict):
     discount_label: str | None
     discount_amount: float | None
     options_groups: list[OptionsGroupDict] | None
+
+class ProductForVectorDict(TypedDict):
+    product_id: int
+    product_name: str
+    product_description: str
+    product_permalink: str
+    has_options: int
+    has_variant: int
+    brand_id: int | None
+    brand_name: str | None
+    categories: list[CategoryDictOld]

@@ -6,13 +6,13 @@ from src.devaito.repositories.products import (
     get_basic_single_product_detail_by_id,
     get_basic_variant_product_detail_by_id,
     get_customizable_product_detail_by_id,
-    get_product_by_id,
+    get_product_by_id, get_product_for_vector_by_id, get_all_products_for_vector,
 )
 from src.devaito.schemas.products import (
     BasicSingleProductDetailDict,
     BasicVariantProductDetailDict,
     CustomizableProductDetailDict,
-    ProductDict,
+    ProductDict, ProductForVectorDict,
 )
 
 
@@ -91,3 +91,40 @@ async def get_customizable_product_detail(
     async with get_async_session(tenant_id) as db:
         product = await get_customizable_product_detail_by_id(db, product_id)
         return product.to_dict() if product else None
+
+
+@tenant_cached(ttl=300)
+async def get_product_for_vector(
+        tenant_id: str,
+        product_id: int,
+) -> ProductForVectorDict | None:
+    """Get product for vector by product ID.
+
+    Args:
+        tenant_id: The tenant identifier
+        product_id: The product ID
+
+    Returns:
+        Dictionary with product info for vector operations, or None if not found
+    """
+    async with get_async_session(tenant_id) as db:
+        product = await get_product_for_vector_by_id(db, product_id)
+        return product.to_dict() if product else None
+
+
+
+@tenant_cached(ttl=300)
+async def get_all_products_for_vectors(
+        tenant_id: str,
+) -> list[ProductForVectorDict]:
+    """Get all products for vector operations.
+
+    Args:
+        tenant_id: The tenant identifier
+
+    Returns:
+        List of dictionaries with product info for vector operations
+    """
+    async with get_async_session(tenant_id) as db:
+        products = await get_all_products_for_vector(db)
+        return [product.to_dict() for product in products]
