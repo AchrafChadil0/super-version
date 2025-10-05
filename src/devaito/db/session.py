@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)  # Set the logging level
 
 # Create file handler
-file_handler = logging.FileHandler("app.log")
+file_handler = logging.FileHandler("logs/app.log")
 file_handler.setLevel(logging.DEBUG)
 
 # Create formatter and add it to the handler

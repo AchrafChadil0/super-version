@@ -1,4 +1,4 @@
-from typing import TypedDict
+from typing import Literal, TypedDict
 
 
 class BrandDict(TypedDict):
@@ -100,7 +100,7 @@ class OptionsGroupDict(TypedDict):
 class CustomizableProductDetailDict(TypedDict):
     product_id: int
     product_name: str
-    product_description: str
+    product_description: str | None
     product_permalink: str
     brand_id: int | None
     brand_name: str | None
@@ -108,15 +108,16 @@ class CustomizableProductDetailDict(TypedDict):
     price: float | None
     quantity: int | None
     has_discount: int | None
-    discount_type_name: str | None
+    discount_type_name: Literal["Percentage", "Flat"] | None
     discount_label: str | None
     discount_amount: float | None
     options_groups: list[OptionsGroupDict] | None
 
+
 class ProductForVectorDict(TypedDict):
     product_id: int
     product_name: str
-    product_description: str
+    product_description: str | None
     product_permalink: str
     has_options: int
     has_variant: int

@@ -1,4 +1,4 @@
-from typing import Optional, Any, Coroutine, Sequence
+from collections.abc import Sequence
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -80,20 +80,17 @@ async def get_customizable_product_detail_by_id(
     result = await db.execute(stmt)
     return result.scalar_one_or_none()
 
+
 async def get_product_for_vector_by_id(
-    db: AsyncSession,
-    product_id: int
-) -> Optional[ProductForVector]:
+    db: AsyncSession, product_id: int
+) -> ProductForVector | None:
     """Get product for vector by product ID."""
-    stmt = select(ProductForVector).where(
-        ProductForVector.product_id == product_id
-    )
+    stmt = select(ProductForVector).where(ProductForVector.product_id == product_id)
     result = await db.execute(stmt)
     return result.scalar_one_or_none()
 
-async def get_all_products_for_vector(
-    db: AsyncSession
-) -> Sequence[ProductForVector]:
+
+async def get_all_products_for_vector(db: AsyncSession) -> Sequence[ProductForVector]:
     """Get all products for vector."""
     stmt = select(ProductForVector)
     result = await db.execute(stmt)

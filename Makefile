@@ -1,0 +1,18 @@
+lint:
+	poetry run ruff check src/ --fix
+lint-c: #check
+	poetry run ruff check src/
+format:
+	poetry run black src/
+format-c: #check
+	poetry run black --check src/
+
+dev:
+	python -m src.core.main dev
+
+start:
+	python -m src.core.main start
+
+console:
+	python -m src.core.main console
+

@@ -2,4 +2,5 @@
 .env
 vdbs
 .idea
-app.log
+logs
+metrics_output.txt

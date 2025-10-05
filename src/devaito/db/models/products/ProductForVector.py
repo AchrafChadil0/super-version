@@ -1,6 +1,8 @@
-from sqlalchemy import Column, Integer, String, JSON
-from src.devaito.schemas.products import ProductForVectorDict
+from sqlalchemy import JSON, Column, Integer, String
+
 from src.devaito.db.session import Base
+from src.devaito.schemas.products import ProductForVectorDict
+from src.devaito.utils.tools import clean_html
 
 
 class ProductForVector(Base):
@@ -8,7 +10,7 @@ class ProductForVector(Base):
 
     product_id = Column(Integer, primary_key=True)
     product_name = Column(String, nullable=False)
-    product_description = Column(String, nullable=False)
+    product_description = Column(String, nullable=True)
     product_permalink = Column(String, nullable=False)
     has_options = Column(Integer, nullable=False)
     has_variant = Column(Integer, nullable=False)
@@ -23,11 +25,11 @@ class ProductForVector(Base):
         return {
             "product_id": self.product_id,
             "product_name": self.product_name,
-            "product_description": self.product_description,
+            "product_description": clean_html(self.product_description),
             "product_permalink": self.product_permalink,
             "has_options": self.has_options,
             "has_variant": self.has_variant,
             "brand_id": self.brand_id,
             "brand_name": self.brand_name,
-            "categories": self.categories
+            "categories": self.categories,
         }

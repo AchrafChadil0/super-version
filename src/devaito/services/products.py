@@ -3,16 +3,19 @@ from sqlalchemy import text
 from src.devaito.config.cache_config import tenant_cached
 from src.devaito.db.session import get_async_session
 from src.devaito.repositories.products import (
+    get_all_products_for_vector,
     get_basic_single_product_detail_by_id,
     get_basic_variant_product_detail_by_id,
     get_customizable_product_detail_by_id,
-    get_product_by_id, get_product_for_vector_by_id, get_all_products_for_vector,
+    get_product_by_id,
+    get_product_for_vector_by_id,
 )
 from src.devaito.schemas.products import (
     BasicSingleProductDetailDict,
     BasicVariantProductDetailDict,
     CustomizableProductDetailDict,
-    ProductDict, ProductForVectorDict,
+    ProductDict,
+    ProductForVectorDict,
 )
 
 
@@ -20,6 +23,7 @@ async def warm_up_db(tenant_id: str):
     """Warm up database connection for a tenant."""
     async with get_async_session(tenant_id) as db:
         await db.execute(text("SELECT 1"))
+
 
 @tenant_cached(ttl=300)
 async def get_product(
@@ -95,8 +99,8 @@ async def get_customizable_product_detail(
 
 @tenant_cached(ttl=300)
 async def get_product_for_vector(
-        tenant_id: str,
-        product_id: int,
+    tenant_id: str,
+    product_id: int,
 ) -> ProductForVectorDict | None:
     """Get product for vector by product ID.
 
@@ -112,10 +116,8 @@ async def get_product_for_vector(
         return product.to_dict() if product else None
 
 
-
-@tenant_cached(ttl=300)
 async def get_all_products_for_vectors(
-        tenant_id: str,
+    tenant_id: str,
 ) -> list[ProductForVectorDict]:
     """Get all products for vector operations.
 

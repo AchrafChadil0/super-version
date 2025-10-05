@@ -2,7 +2,10 @@ import asyncio
 import time
 from pprint import pprint
 
-from src.devaito.services.products import get_product_for_vector, get_all_products_for_vectors
+from src.devaito.services.products import (
+    get_all_products_for_vectors,
+    get_product_for_vector,
+)
 
 
 async def main():
@@ -12,7 +15,6 @@ async def main():
     print("=" * 80)
     print("TEST 1: Get single product for vector by ID")
     print("=" * 80)
-
 
     product_id = 15  # Replace with actual product_id
     start_time = time.time()
