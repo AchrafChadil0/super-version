@@ -16,3 +16,5 @@ start:
 console:
 	python -m src.core.main console
 
+download:
+	python -m src.core.main download-files

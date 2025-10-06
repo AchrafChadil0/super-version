@@ -182,9 +182,9 @@ class VectorStore:
             return {"success": False, "error": str(e)}
 
     def search_products(
-            self,
-            query: str,
-            n_results: int = 5,
+        self,
+        query: str,
+        n_results: int = 5,
     ) -> list[VectorProductSearchResult]:
         """
         Search for products using semantic similarity
@@ -221,7 +221,9 @@ class VectorStore:
                     categories = json.loads(value)
 
                     # Add similarity score (convert distance to similarity)
-                    distance = results["distances"][0][i] if results["distances"] else 1.0
+                    distance = (
+                        results["distances"][0][i] if results["distances"] else 1.0
+                    )
                     similarity_score = 1.0 / (1.0 + distance)  # Convert to 0-1 scale
 
                     # Add parsed categories back to product

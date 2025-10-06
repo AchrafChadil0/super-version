@@ -2,7 +2,7 @@
 # fmt: off
 from .registry import ToolConfig
 from .configs import SEARCH_PRODUCTS
-from .implementations import search_products, redirect_to_product_page
+from .implementations import search_products
 # fmt: on
 # isort: on
 
@@ -13,5 +13,4 @@ __all__ = [
     "SEARCH_PRODUCTS",
     # Implementations
     "search_products",
-    "redirect_to_product_page",
 ]

@@ -1,9 +1,27 @@
+import json
 import logging
 from datetime import datetime
 
-from livekit.agents import Agent
+from livekit.agents import Agent, RunContext, ToolError, function_tool, get_job_context
+from livekit.rtc import RpcError
 
-from src.agent.tools import redirect_to_product_page, search_products
+from src.agent.order_task import OrderTask
+from src.agent.state_manager import PerJobState
+from src.agent.tools import search_products
+from src.agent.tools.configs import REDIRECT_TO_PRODUCT_PAGE
+from src.devaito.services.products import (
+    get_basic_single_product_detail,
+    get_basic_variant_product_detail,
+    get_customizable_product_detail,
+)
+from src.models.order_models import OrderResult
+from src.schemas.products import ProductType
+from src.utils.tools import (
+    format_basic_single_product_for_llm,
+    format_basic_variant_product_for_llm,
+    format_customizable_product_for_llm,
+    log_to_file,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -20,8 +38,81 @@ class Assistant(Agent):
 
         super().__init__(
             instructions=self._build_instructions(),
-            tools=[search_products, redirect_to_product_page],
+            tools=[search_products],
         )
+
+    @function_tool(
+        name=REDIRECT_TO_PRODUCT_PAGE.name,
+        description=REDIRECT_TO_PRODUCT_PAGE.to_description(),
+    )
+    async def redirect_to_product_page(
+        self,
+        context: RunContext,
+        redirect_url: str,
+        product_id: int,
+        product_type: ProductType,
+    ) -> dict[str, any]:
+        try:
+            state: PerJobState = context.userdata
+            website_name = state.website_name
+            room = get_job_context().room
+
+            if not room.remote_participants:
+                raise ToolError("No participants to redirect")
+
+            participant_identity = next(iter(room.remote_participants))
+
+            try:
+                await room.local_participant.perform_rpc(
+                    destination_identity=participant_identity,
+                    method="redirectToPage",
+                    payload=json.dumps({"url": redirect_url}),
+                )
+            except RpcError as e:
+                raise ToolError("Failed to redirect to product page") from e
+
+            if product_type == "basic":
+                product_details = await get_basic_single_product_detail(
+                    tenant_id=website_name, product_id=product_id
+                )
+                formated_details = format_basic_single_product_for_llm(
+                    product_details, currency=state.currency
+                )
+            elif product_type == "variant":
+                product_details = await get_basic_variant_product_detail(
+                    tenant_id=website_name, product_id=product_id
+                )
+                formated_details = format_basic_variant_product_for_llm(
+                    product_details, currency=state.currency
+                )
+            elif product_type == "customizable":
+                product_details = await get_customizable_product_detail(
+                    tenant_id=website_name, product_id=product_id
+                )
+                formated_details = format_customizable_product_for_llm(
+                    product_details=product_details, currency=state.currency
+                )
+            else:
+                raise ValueError(f"Invalid product type: {product_type}")
+            log_to_file("7ALIM", formated_details)
+            order_result: OrderResult = await OrderTask(
+                product_name=product_details.get("product_name", "Product Name"),
+                product_details_summary=formated_details,
+                chat_ctx=self.chat_ctx,  # Pass the current chat context for continuity
+                product_type=product_type.lower(),
+                website_name=state.website_name,
+                website_description=state.website_description,
+                preferred_language=state.preferred_language,
+            )
+
+            return {
+                "message": order_result.message,
+            }
+
+        except ToolError:
+            raise
+        except Exception as e:
+            raise ToolError("Product page redirect failed") from e
 
     def _build_instructions(self) -> str:
         """Build instructions with injected variables."""

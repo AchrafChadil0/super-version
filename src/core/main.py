@@ -23,10 +23,13 @@ async def entrypoint(ctx: agents.JobContext):
     preferred_language = parsed_metadata.get("language", "en")
 
     session = AgentSession(
-        llm=openai.realtime.RealtimeModel(model="gpt-4o-mini-realtime-preview"),
+        llm=openai.realtime.RealtimeModel(
+            model="gpt-4o-mini-realtime-preview-2024-12-17"
+        ),
         tts=openai.TTS(
             voice="alloy",
         ),
+        vad=ctx.proc.userdata["vad"],
     )
 
     state = PerJobState(
