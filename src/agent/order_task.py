@@ -2,16 +2,19 @@ import json
 import logging
 from typing import Any
 
-from livekit.agents import AgentTask, RunContext, function_tool, get_job_context
+from livekit.agents import AgentTask, RunContext, function_tool, get_job_context, Agent, ToolError
 
+from src.agent.tools import SYNC_ORDER_OPTIONS, INCREASE_PRODUCT_QUANTITY, DECREASE_PRODUCT_QUANTITY, SELECT_OPTION, \
+    UNSELECT_OPTION, COMPLETE_ORDER
+from src.agent.tools.configs import EXIT_ORDERING_TASK
 from src.models.order_models import OrderResult, OrderState
-from src.schemas.products import SyncResponse
+from src.schemas.products import SyncResponse, ProductType
 from src.utils.tools import log_to_file
 
 logger = logging.getLogger(__name__)
 
 
-class OrderTask(AgentTask[OrderResult]):
+class OrderTask(Agent):
     """
     A focused task for handling product customization and adding to cart.
     This task is designed to be handed control after the user has been
@@ -53,47 +56,94 @@ class OrderTask(AgentTask[OrderResult]):
         This is crucial for guiding the LML through the customization process.
         """
         base_instructions = f"""
-You are a smart voice assistant for {self.website_name}
-Language: ALWAYS respond in user's preferred_language {self.preferred_language} (ISO 639: {self.preferred_language}), if preferred_language was specified, just speak in the user's language, adapt with what ever language he speaks
-Website: {self.website_description}
+You are a focused, friendly voice assistant for **{self.website_name}**, currently helping the user customize one specific product:  
+**“{self.product_name}”**.
 
-You are now in a temporary, focused ordering task for the product: **{self.product_name}**.
-Your ONLY job is to help the user customize this specific product and add it to their cart.
-Do NOT handle navigation, search, or unrelated requests. If the user asks to go back, look for something else, or seems unsure, use the `exit_ordering_task` tool.
+---
 
-Here are the product's customization options:
+### Language & Tone
+- Always respond in the user’s language (detected or specified as `{self.preferred_language}`).
+- Use a warm, patient, conversational tone—like a helpful store associate.
+- Avoid robotic, formal, or repetitive phrasing.
+
+---
+
+### Your Role (Strict Scope)
+Your only job is to:
+1. Guide the user through customizing this exact product.
+2. Help them select options (including “no X” choices like “SANS FROMAGE” or “without cheese”), adjust quantity, and confirm adding it to their cart.
+
+Never:
+- Answer general questions (e.g., “What’s your return policy?”).
+- Handle navigation (“Take me to contact”), search (“Do you have pizza?”), or unrelated topics.
+- Suggest other products or alternatives.
+
+If the user says anything off-topic, wants to go back, or seems unsure (e.g., “never mind”, “I changed my mind”, “show me something else”), immediately call `exit_ordering_task` with a clear reason.
+
+---
+
+### Customization Flow
+
+#### Step 1: Warm Welcome
+“Great choice! You’re customizing the **{self.product_name}**. It starts at [base price]. Let’s personalize it together!”
+
+#### Step 2: Walk Through Option Groups
+For each customization group (e.g., Toppings, Size, Add-ons):
+- Present 2–3 most popular or default options first.
+- Always include price impact for paid options (e.g., “+ $1.50”).
+- Ask: “What would you like for [group name]?”
+
+User says:
+- “More options” → List 2–3 additional choices.
+- “Skip” or “Next” → Move to the next group.
+- “I want it without cheese”, “SANS OIGNON”, “no bacon” → Treat this as selecting a “no X” option (e.g., “SANS FROMAGE”) → use `select_option`.
+- “Remove bacon”, “take off the onions”, “I don’t want cheese anymore” → Only if X was already selected → use `unselect_option`.
+
+Respect min/max rules (e.g., “Choose 1 size”, “Pick up to 3 toppings”).
+
+Key distinction:  
+- “Without X” = select the “no X” option (it’s a valid choice in the UI).  
+- “Remove X” = unselect X (only if it was previously added).
+
+#### Step 3: Final Summary
+“You’ve selected: [Option A], [Option B]… Total: $X.XX for [quantity] item(s).”  
+“Would you like to add this to your cart?”
+
+#### Step 4: Final Action
+- User confirms (e.g., “Yes, add it”) → Call `complete_order()`.
+- User hesitates, declines, or changes mind → Call `exit_ordering_task`.
+
+---
+
+### Tool Usage Rules (Non-Negotiable)
+
+| Tool | When to Use |
+|------|-------------|
+| `sync_order_options()` | ALWAYS call first on entry, and before describing current selections. You have no memory—sync every time! |
+| `select_option(group_id, option_id)` | When user chooses any visible option—including “no cheese”, “SANS FROMAGE”, “large size”, etc. |
+| `unselect_option(group_id, option_id)` | Only when user wants to remove an option that was already selected (e.g., “take off the bacon”). |
+| `increase_product_quantity()` | On clear request: “two of these”, “I want more”. |
+| `decrease_product_quantity()` | On clear request: “just one”, “reduce to one”. |
+| `complete_order()` | ONLY after explicit confirmation like “Go ahead” or “Add to cart”. |
+| `exit_ordering_task(exit_reason)` | For any off-topic, cancellation, or navigation request. |
+
+---
+
+### Critical Guardrails
+- Never list more than 4 options at once—start with top picks.
+- Always sync before summarizing—never assume state.
+- Never ask “Would you like to see options?”—you’re already in the product!
+- Never suggest or prompt customizations for products that are not listed in product_details. Only the customizations explicitly mentioned in product_details are allowed 
+- If in doubt, exit gracefully—don’t force the flow.
+
+---
+
+### Product Details
 {self.product_details_summary}
 
-YOUR TASK:
-1.  Guide the user through customizing their product using the tools provided.
-2.  Start by summarizing the product and its base price.
-3.  Then, go through each option group one by one.
-    - For each group, present 2-3 popular or default options first.
-    - Ask the user what they would like for that group.
-    - If they ask for "more options," list additional ones.
-    - If they say "skip" or "next," move to the next group.
-    - Always respect the min/max constraints for each group.
-4.  After all groups are processed, summarize the user's selections and the total price.
-5.  Ask the user to confirm if they want to add this customized item to their cart.
-6.  If at ANY POINT the user indicates they want to stop, go back, or look for something else, use the `exit_ordering_task` tool.
+---
 
-AVAILABLE TOOLS (USE THEM AS NEEDED):
-- `sync_order_options()`: ALWAYS call this first to get the user's current selections from the frontend. Call it again after any change.
-- `select_option(group_id, option_id)`: Use when the user wants to add a specific option.
-- `unselect_option(group_id, option_id)`: Use when the user wants to remove a specific option.
-- `increase_product_quantity()`: Use when the user wants more of this item.
-- `decrease_product_quantity()`: Use when the user wants less of this item.
-- `complete_order()`: Call this tool ONLY when the user explicitly confirms they want to add the item to their cart. This will end the task.
-- `exit_ordering_task(exist_reason)`: Call this tool when the user wants to STOP and return to the main assistant (e.g., "never mind", "go back", "look for something else"). This will cancel the order and return control.
-
-CRITICAL RULES:
-- NEVER list all options in a group if there are more than 3-4. Start with the most popular.
-- ALWAYS mention the price for paid options.
-- ALWAYS call `sync_order_options()` before answering any question about the user's current selections.
-- Be conversational and patient. Let the user control the pace.
-- YOU HAVE NO MEMORY OF PREVIOUS SELECTIONS. ALWAYS sync before describing.
-- Once the order is confirmed via `complete_order()`, OR if the user cancels via `exit_ordering_task`, the task will end and control will return to the main assistant.
-- If the user asks ANYTHING unrelated to customizing THIS product (e.g., "where is the contact page?", "do you have pizza?", "what's your return policy?"), use `exit_ordering_task` immediately.
+Now begin by welcoming the user and summarizing the base product.
 """
 
         return base_instructions
@@ -106,9 +156,11 @@ CRITICAL RULES:
             instructions=f"Start by welcoming the user to customize the '{self.product_name}'. Summarize its base details and begin guiding them through the first option group."
         )
 
-    @function_tool()
+    @function_tool(
+        name=SYNC_ORDER_OPTIONS.name,
+        description=SYNC_ORDER_OPTIONS.to_description()
+    )
     async def sync_order_options(self, context: RunContext):
-        """ALWAYS call this before answering questions about user's selected options."""
         room = get_job_context().room
         if not room.remote_participants:
             return {"success": False, "error": "No participants to redirect"}
@@ -129,7 +181,10 @@ CRITICAL RULES:
         )
         return {"success": True, "summary": self.current_order.to_summary()}
 
-    @function_tool()
+    @function_tool(
+        name=INCREASE_PRODUCT_QUANTITY.name,
+        description=INCREASE_PRODUCT_QUANTITY.to_description(),
+    )
     async def increase_product_quantity(self, context: RunContext) -> dict[str, Any]:
         """Call when the user wants to increase the quantity."""
         room = get_job_context().room
@@ -145,7 +200,7 @@ CRITICAL RULES:
             payload=json.dumps(
                 {
                     "product_type": (
-                        "basic" if self.product_type == "variant" else self.product_type
+                        "basic" if self.product_type ==  ProductType.VARIANT else self.product_type
                     )
                 }
             ),
@@ -158,7 +213,10 @@ CRITICAL RULES:
         # await self.sync_order_options(context)
         return {"message": response}
 
-    @function_tool()
+    @function_tool(
+        name=DECREASE_PRODUCT_QUANTITY.name,
+        description=DECREASE_PRODUCT_QUANTITY.to_description(),
+    )
     async def decrease_product_quantity(self, context: RunContext) -> dict[str, Any]:
         """Call when the user wants to decrease the quantity."""
         room = get_job_context().room
@@ -174,7 +232,7 @@ CRITICAL RULES:
             payload=json.dumps(
                 {
                     "product_type": (
-                        "basic" if self.product_type == "variant" else self.product_type
+                        "basic" if self.product_type == ProductType.VARIANT else self.product_type
                     )
                 }
             ),
@@ -187,11 +245,13 @@ CRITICAL RULES:
         # await self.sync_order_options(context)
         return {"message": response}
 
-    @function_tool()
+    @function_tool(
+        name=SELECT_OPTION.name,
+        description=SELECT_OPTION.to_description(),
+    )
     async def select_option(
         self, context: RunContext, group_id: int, option_id: int
     ) -> dict[str, Any]:
-        """Select an option in the current product customization."""
         try:
             room = get_job_context().room
             if not room.remote_participants:
@@ -203,7 +263,7 @@ CRITICAL RULES:
                     "option_id": option_id,
                     "action": "select",
                     "product_type": (
-                        "basic" if self.product_type == "variant" else self.product_type
+                        "basic" if self.product_type == ProductType.VARIANT else self.product_type
                     ),
                 }
             )
@@ -222,11 +282,13 @@ CRITICAL RULES:
         except Exception as e:
             return {"success": False, "error": f"Failed to select option: {str(e)}"}
 
-    @function_tool()
+    @function_tool(
+        name=UNSELECT_OPTION.name,
+        description=UNSELECT_OPTION.to_description(),
+    )
     async def unselect_option(
         self, context: RunContext, group_id: int, option_id: int
     ) -> dict[str, Any]:
-        """Unselect an option in the current product customization."""
         try:
             room = get_job_context().room
             if not room.remote_participants:
@@ -255,18 +317,15 @@ CRITICAL RULES:
         except Exception as e:
             return {"success": False, "error": f"Failed to unselect option: {str(e)}"}
 
-    @function_tool()
-    async def complete_order(self, context: RunContext) -> None:
-        """
-        Call this tool when the user confirms they want to add the item to their cart.
-        This will finalize the task and return control to the main agent.
-        """
+    @function_tool(
+        name=COMPLETE_ORDER.name,
+        description=COMPLETE_ORDER.to_description(),
+    )
+    async def complete_order(self, context: RunContext):
+        from src.agent.assistant import Assistant
         room = get_job_context().room
         if not room.remote_participants:
-            self.complete(
-                OrderResult(message="No participants available to add to cart")
-            )
-            return
+            raise ToolError("No participants available")
 
         participant_identity = next(iter(room.remote_participants))
         try:
@@ -277,60 +336,21 @@ CRITICAL RULES:
                 response_timeout=10.0,
             )
             if not response:
-                self.complete(
-                    OrderResult(
-                        message="Failed to add item to cart",
-                        product_name=self.product_name,
-                    )
-                )
-                return
+                raise ToolError("Failed to add item to cart")
 
-            result = OrderResult(
-                message=response,  # You can parse this for a user-friendly message
-                product_name=self.product_name,
-            )
-            self.complete(result)
+            return Assistant(chat_ctx=self.chat_ctx), f"the order has been successfully completed for {self.product_name},"
 
         except Exception as e:
             logger.error(f"Error in complete_order: {e}")
-            self.complete(
-                OrderResult(
-                    message="An error occurred while attempting to add the item to cart",
-                    product_name=self.product_name,
-                )
-            )
+            raise ToolError("An error occurred while attempting to add the item to cart")
 
     # Inside your OrderTask class in order_task.py
 
-    @function_tool()
-    async def exit_ordering_task(self, exist_reason: str) -> None:
-        """
-        Args:
-            exist_reason (str): the reason why the user want to exit the ordering task
-        Use this tool when the user wants to STOP customizing this product and return to the main assistant.
-        Call this when the user says things like:
-        - "Never mind"
-        - "I changed my mind"
-        - "Go back"
-        - "I want to look for something else"
-        - "Cancel this"
-        - "Take me back"
-        - "I'm not ready to order this"
-        - "Actually, I have a question about something else"
-        Effect:
-          1. Gracefully exits this ordering task.
-          2. Returns control to the main SimpleAssistant agent.
-          3. Does NOT add anything to the cart.
-        Important: Always confirm with the user before calling this tool if their intent is ambiguous.
-        Example:
-          User: "Actually, I want to see if you have a veggie burger instead."
-          You: "Sure, I'll take you back so you can search for other options." → [exit_ordering_task]
-        """
-        # Create a cancellation result
-        result = OrderResult(
-            message=f"User exited customization for {self.product_name} without adding to cart.",
-            product_name=self.product_name,
-            # You can add a field like `cancelled=True` to your OrderResult dataclass if you want to track this explicitly
-        )
+    @function_tool(
+        name=EXIT_ORDERING_TASK.name,
+        description=EXIT_ORDERING_TASK.to_description(),
+    )
+    async def exit_ordering_task(self, exist_reason: str):
+        from src.agent.assistant import Assistant
         # Complete the task with the cancellation result
-        self.complete(result)
+        return Assistant(chat_ctx=self.chat_ctx), f"User exited customization for {self.product_name}, reason fot the user's exit {exist_reason}"

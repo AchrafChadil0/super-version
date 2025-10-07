@@ -165,3 +165,242 @@ REDIRECT_TO_WEBSITE_PAGE = ToolConfig(
         '→ Say: "Heading to the homepage!"',
     ],
 )
+
+
+
+
+"""
+All tool configurations for the Agent.
+Add new tools here
+"""
+
+from . import ToolConfig
+
+# ============================================
+# ORDER TASK TOOLS (used inside OrderTask agent)
+# ============================================
+
+SYNC_ORDER_OPTIONS = ToolConfig(
+    name="sync_order_options",
+    purpose="Fetch the user's current product customization selections from the frontend.",
+    when_to_use=(
+        "call this when the user ask any question about the user's current selections, total price, or chosen options."
+    ),
+    parameters={},
+    execution_notes=[
+        "Takes ~1 second to sync state from browser",
+        "Updates internal order state with real-time selections",
+        "Required before summarizing or confirming order",
+    ],
+    behavior_steps=[
+        "Sends RPC 'syncProductOptions' to frontend",
+        "Receives current selections, quantity, and total price",
+        "Parses response into structured OrderState",
+        "Returns human-readable summary of current configuration",
+    ],
+    response_format={
+        "success": "boolean - True if sync succeeded",
+        "summary": "string - Natural language summary of current selections and total",
+    },
+    critical_rules=[
+        "MUST be called before describing user's current choices",
+        "Never assume prior state — always sync first",
+        "If sync fails, inform user and retry once",
+    ],
+    examples=[
+        "On task start: → sync_order_options() → 'You currently have: Classic Burger, no onions, extra cheese. Total: $12.50'",
+        "User: 'What did I pick so far?' → sync_order_options() → respond with summary",
+    ],
+)
+
+SELECT_OPTION = ToolConfig(
+    name="select_option",
+    purpose="Add a specific customization option to the user's product — including 'no X' options like 'SANS FROMAGE', 'NO CHEESE', etc.",
+    when_to_use=(
+        "When the user explicitly chooses ANY option — positive (e.g., 'add bacon') OR negative (e.g., 'without cheese', 'SANS OIGNION'). "
+        "Treat all visible options in the UI as valid selections, even if they mean exclusion."
+    ),
+    parameters={
+        "group_id": "Integer ID of the option group (e.g., 1 for 'Toppings', 2 for 'Size')",
+        "option_id": "Integer ID of the specific option within the group — including 'no X' options",
+    },
+    execution_notes=[
+        "Sends selection to frontend via 'toggleOptionSelection'",
+        "Frontend updates UI and recalculates price",
+        "Does NOT auto-sync — call sync_order_options afterward if needed",
+    ],
+    behavior_steps=[
+        "Validates group_id and option_id exist in product schema",
+        "Sends RPC with action='select'",
+        "Confirms selection was applied",
+    ],
+    response_format={
+        "message": "string - Confirmation from frontend (e.g., 'Option added')",
+        "group_id": "int - The group ID selected",
+        "option_id": "int - The option ID selected",
+    },
+    critical_rules=[
+        "Only call when user makes a clear selection — whether adding or excluding",
+        "Never guess group_id/option_id — rely on product details from earlier",
+        "Do not call if user says 'maybe' or is undecided",
+        "If user says 'without X', find the corresponding 'no X' option in the group and select it — do NOT unselect unless X was already selected",
+    ],
+    examples=[
+        'User: "Add extra cheese"\n→ select_option(group_id=3, option_id=12)\n→ "Added extra cheese (+$1.00)"',
+        'User: "I want the spicy sauce"\n→ select_option(group_id=5, option_id=8)',
+        'User: "I want it without cheese"\n→ select_option(group_id=3, option_id=15) ← where option_id=15 = "SANS FROMAGE"',
+        'User: "SANS OIGNION please"\n→ select_option(group_id=3, option_id=17) ← assuming "SANS OIGNION" is option 17',
+    ],
+)
+UNSELECT_OPTION = ToolConfig(
+    name="unselect_option",
+    purpose="Remove a previously selected customization option that the user now wants to cancel.",
+    when_to_use=(
+        "When the user wants to remove an option that was ALREADY selected (e.g., 'remove bacon', 'I don’t want that anymore', 'take off the onions')."
+    ),
+    parameters={
+        "group_id": "Integer ID of the option group",
+        "option_id": "Integer ID of the option to remove — must have been previously selected",
+    },
+    execution_notes=[
+        "Sends 'unselect' action to frontend",
+        "Useful for correcting mistakes or changing mind",
+    ],
+    behavior_steps=[
+        "Sends RPC with action='unselect'",
+        "Frontend removes option and updates total",
+    ],
+    response_format={
+        "message": "string - Confirmation from frontend",
+        "group_id": "int",
+        "option_id": "int",
+    },
+    critical_rules=[
+        "Only unselect if user explicitly requests removal AND the option was previously selected",
+        "Do NOT unselect options just because user picks a different one in same group — let frontend handle exclusivity",
+        "NEVER use unselect for 'I want without X' if X was never selected — use select_option with the 'no X' option instead",
+    ],
+    examples=[
+        'User: "Actually, no bacon" ← if bacon was previously selected\n→ unselect_option(group_id=3, option_id=7)',
+        'User: "I dont want cheese anymore" ← if cheese was selected\n→ unselect_option(group_id=3, option_id=12)',
+        'User: "Take off the onions" ← if onions were selected\n→ unselect_option(group_id=3, option_id=9)',
+
+    ],
+)
+
+INCREASE_PRODUCT_QUANTITY = ToolConfig(
+    name="increase_product_quantity",
+    purpose="Increase the quantity of the current product to be added to cart.",
+    when_to_use="When user says 'two of these', 'make it three', 'I want more', etc.",
+    parameters={},
+    execution_notes=[
+        "Sends 'increaseProductQuantity' RPC",
+        "Frontend handles min/max validation",
+    ],
+    behavior_steps=[
+        "Triggers +1 quantity increment in browser",
+        "Updates displayed total",
+    ],
+    response_format={
+        "message": "string - Frontend confirmation (e.g., 'Quantity: 2')",
+    },
+    critical_rules=[
+        "Do not allow quantity to exceed frontend limits",
+        "Always sync or ask frontend for new total if discussing price after change",
+    ],
+    examples=[
+        'User: "I’ll take two"\n→ increase_product_quantity()',
+    ],
+)
+
+DECREASE_PRODUCT_QUANTITY = ToolConfig(
+    name="decrease_product_quantity",
+    purpose="Decrease the quantity of the current product.",
+    when_to_use="When user says 'just one', 'cancel one', 'reduce to one', etc.",
+    parameters={},
+    execution_notes=[
+        "Sends 'decreaseProductQuantity' RPC",
+        "Prevents quantity from going below 1",
+    ],
+    behavior_steps=[
+        "Triggers -1 quantity decrement (min 1)",
+    ],
+    response_format={
+        "message": "string - Updated quantity confirmation",
+    },
+    critical_rules=[
+        "Never let quantity drop below 1",
+    ],
+    examples=[
+        'User: "Actually, just one"\n→ decrease_product_quantity()',
+    ],
+)
+
+COMPLETE_ORDER = ToolConfig(
+    name="complete_order",
+    purpose="Finalize and add the customized product to the user's cart.",
+    when_to_use=(
+        "ONLY when the user explicitly confirms they want to add the item to cart "
+        "(e.g., 'Yes, add it', 'Go ahead', 'I’m ready to order')."
+    ),
+    parameters={},
+    execution_notes=[
+        "Sends 'addToCart' RPC to frontend",
+        "Ends the OrderTask and returns control to main assistant",
+        "Irreversible action — requires clear user intent",
+    ],
+    behavior_steps=[
+        "Validates all required groups have selections (if applicable)",
+        "Adds item to cart",
+        "Returns success message",
+    ],
+    response_format={
+        "status": "'success'",
+        "action": "'added_to_cart'",
+        "product": "string - Product name that was added",
+    },
+    critical_rules=[
+        "NEVER call without explicit user confirmation",
+        "Do not assume 'sounds good' or 'okay' is confirmation — ask: 'Shall I add it to your cart?'",
+        "After this, the task ends and main assistant resumes",
+    ],
+    examples=[
+        'User: "Yes, add it to my cart"\n→ complete_order()\n→ Task ends, main agent takes over',
+    ],
+)
+
+EXIT_ORDERING_TASK = ToolConfig(
+    name="exit_ordering_task",
+    purpose="Cancel the current ordering task and return to the main assistant.",
+    when_to_use=(
+        "When user says 'never mind', 'go back', 'I changed my mind', 'show me something else', "
+        "or asks unrelated questions (e.g., 'what’s your return policy?')."
+    ),
+    parameters={
+        "exit_reason": "Brief string explaining why user exited (for logging/analytics)",
+    },
+    execution_notes=[
+        "Gracefully cancels customization",
+        "Does NOT add anything to cart",
+        "Returns control to main Assistant agent",
+    ],
+    behavior_steps=[
+        "Logs exit reason",
+        "Signals task completion with cancellation status",
+        "Main agent resumes handling general requests",
+    ],
+    response_format={
+        "status": "'cancelled'",
+        "reason": "string - User-provided or inferred reason",
+        "product": "string - Product name that was being customized",
+    },
+    critical_rules=[
+        "Call immediately on off-topic or cancellation cues",
+        "Do not try to recover or upsell — respect user’s intent to leave",
+        "Always confirm intent if ambiguous (e.g., 'Would you like to go back to browsing?') before exiting",
+    ],
+    examples=[
+        'User: "Actually, I want to look for pizza instead"\n→ exit_ordering_task(exit_reason="wants different product")',
+        'User: "What’s your contact number?"\n→ exit_ordering_task(exit_reason="asked unrelated question")',
+    ],
+)

@@ -2,7 +2,7 @@ import json
 import logging
 from datetime import datetime
 
-from livekit.agents import Agent, RunContext, ToolError, function_tool, get_job_context
+from livekit.agents import Agent, RunContext, ToolError, function_tool, get_job_context, NotGiven
 from livekit.rtc import RpcError
 
 from src.agent.order_task import OrderTask
@@ -31,6 +31,7 @@ class Assistant(Agent):
 
     def __init__(
         self,
+        chat_ctx = None
     ) -> None:
         self.preferred_language: str = ""
         self.website_description: str = ""
@@ -39,7 +40,7 @@ class Assistant(Agent):
         super().__init__(
             instructions=self._build_instructions(),
             tools=[search_products],
-        )
+            chat_ctx=chat_ctx)
 
     @function_tool(
         name=REDIRECT_TO_PRODUCT_PAGE.name,
@@ -51,7 +52,7 @@ class Assistant(Agent):
         redirect_url: str,
         product_id: int,
         product_type: ProductType,
-    ) -> dict[str, any]:
+    ):
         try:
             state: PerJobState = context.userdata
             website_name = state.website_name
@@ -71,21 +72,21 @@ class Assistant(Agent):
             except RpcError as e:
                 raise ToolError("Failed to redirect to product page") from e
 
-            if product_type == "basic":
+            if product_type == ProductType.BASIC:
                 product_details = await get_basic_single_product_detail(
                     tenant_id=website_name, product_id=product_id
                 )
                 formated_details = format_basic_single_product_for_llm(
                     product_details, currency=state.currency
                 )
-            elif product_type == "variant":
+            elif product_type == ProductType.VARIANT:
                 product_details = await get_basic_variant_product_detail(
                     tenant_id=website_name, product_id=product_id
                 )
                 formated_details = format_basic_variant_product_for_llm(
                     product_details, currency=state.currency
                 )
-            elif product_type == "customizable":
+            elif product_type == ProductType.CUSTOMIZABLE:
                 product_details = await get_customizable_product_detail(
                     tenant_id=website_name, product_id=product_id
                 )
@@ -95,7 +96,7 @@ class Assistant(Agent):
             else:
                 raise ValueError(f"Invalid product type: {product_type}")
             log_to_file("7ALIM", formated_details)
-            order_result: OrderResult = await OrderTask(
+            return OrderTask(
                 product_name=product_details.get("product_name", "Product Name"),
                 product_details_summary=formated_details,
                 chat_ctx=self.chat_ctx,  # Pass the current chat context for continuity
@@ -105,9 +106,7 @@ class Assistant(Agent):
                 preferred_language=state.preferred_language,
             )
 
-            return {
-                "message": order_result.message,
-            }
+
 
         except ToolError:
             raise

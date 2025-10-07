@@ -1740,14 +1740,14 @@ types-protobuf = ">=3"
 
 [[package]]
 name = "livekit-agents"
-version = "1.2.8"
+version = "1.2.14"
 description = "A powerful framework for building realtime voice AI agents"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "livekit_agents-1.2.8-py3-none-any.whl", hash = "sha256:46eb8d46dfb07517eb481a3bd7fca8e52e2e6987ecd2929eaf5f35a734a0a4ed"},
-    {file = "livekit_agents-1.2.8.tar.gz", hash = "sha256:9948a1a79133322fcb5354d9eeaea0287be34cef7993cfe548fcef786b64670b"},
+    {file = "livekit_agents-1.2.14-py3-none-any.whl", hash = "sha256:505e65db56a1acc1d8d4379712230d5ef72e856331a6cdeb3d8adb9203335608"},
+    {file = "livekit_agents-1.2.14.tar.gz", hash = "sha256:f21b8440c28175d77d4dae06318d649e8ac734b50c2dfc7aa84fe12f6247f184"},
 ]
 
 [package.dependencies]
@@ -1763,12 +1763,13 @@ eval-type-backport = "*"
 livekit = ">=1.0.12,<2"
 livekit-api = ">=1.0.5,<2"
 livekit-blingfire = ">=1.0,<2.0"
-livekit-plugins-openai = {version = ">=1.2.8", optional = true, markers = "extra == \"openai\""}
-livekit-plugins-silero = {version = ">=1.2.8", optional = true, markers = "extra == \"silero\""}
-livekit-plugins-turn-detector = {version = ">=1.2.8", optional = true, markers = "extra == \"turn-detector\""}
+livekit-plugins-openai = {version = ">=1.2.14", optional = true, markers = "extra == \"openai\""}
+livekit-plugins-silero = {version = ">=1.2.14", optional = true, markers = "extra == \"silero\""}
+livekit-plugins-turn-detector = {version = ">=1.2.14", optional = true, markers = "extra == \"turn-detector\""}
 livekit-protocol = ">=1.0,<2.0"
 nest-asyncio = ">=1.6.0"
 numpy = ">=1.26.0"
+openai = ">=1.99.2"
 opentelemetry-api = ">=1.34"
 opentelemetry-exporter-otlp = ">=1.34.1"
 opentelemetry-sdk = ">=1.34.1"
@@ -1784,47 +1785,51 @@ typing-extensions = ">=4.12"
 watchfiles = ">=1.0"
 
 [package.extras]
-anam = ["livekit-plugins-anam (>=1.2.8)"]
-anthropic = ["livekit-plugins-anthropic (>=1.2.8)"]
-assemblyai = ["livekit-plugins-assemblyai (>=1.2.8)"]
-aws = ["livekit-plugins-aws (>=1.2.8)"]
-azure = ["livekit-plugins-azure (>=1.2.8)"]
-baseten = ["livekit-plugins-baseten (>=1.2.8)"]
-bey = ["livekit-plugins-bey (>=1.2.8)"]
-bithuman = ["livekit-plugins-bithuman (>=1.2.8)"]
-cartesia = ["livekit-plugins-cartesia (>=1.2.8)"]
-clova = ["livekit-plugins-clova (>=1.2.8)"]
+anam = ["livekit-plugins-anam (>=1.2.14)"]
+anthropic = ["livekit-plugins-anthropic (>=1.2.14)"]
+assemblyai = ["livekit-plugins-assemblyai (>=1.2.14)"]
+aws = ["livekit-plugins-aws (>=1.2.14)"]
+azure = ["livekit-plugins-azure (>=1.2.14)"]
+baseten = ["livekit-plugins-baseten (>=1.2.14)"]
+bey = ["livekit-plugins-bey (>=1.2.14)"]
+bithuman = ["livekit-plugins-bithuman (>=1.2.14)"]
+cartesia = ["livekit-plugins-cartesia (>=1.2.14)"]
+clova = ["livekit-plugins-clova (>=1.2.14)"]
 codecs = ["av (>=12.0.0)", "numpy (>=1.26.0)"]
-deepgram = ["livekit-plugins-deepgram (>=1.2.8)"]
-elevenlabs = ["livekit-plugins-elevenlabs (>=1.2.8)"]
-fal = ["livekit-plugins-fal (>=1.2.8)"]
-gladia = ["livekit-plugins-gladia (>=1.2.8)"]
-google = ["livekit-plugins-google (>=1.2.8)"]
-groq = ["livekit-plugins-groq (>=1.2.8)"]
-hedra = ["livekit-plugins-hedra (>=1.2.8)"]
-hume = ["livekit-plugins-hume (>=1.2.8)"]
+deepgram = ["livekit-plugins-deepgram (>=1.2.14)"]
+elevenlabs = ["livekit-plugins-elevenlabs (>=1.2.14)"]
+fal = ["livekit-plugins-fal (>=1.2.14)"]
+fireworksai = ["livekit-plugins-fireworksai (>=1.2.14)"]
+gladia = ["livekit-plugins-gladia (>=1.2.14)"]
+google = ["livekit-plugins-google (>=1.2.14)"]
+groq = ["livekit-plugins-groq (>=1.2.14)"]
+hedra = ["livekit-plugins-hedra (>=1.2.14)"]
+hume = ["livekit-plugins-hume (>=1.2.14)"]
 images = ["pillow (>=10.3.0)"]
-inworld = ["livekit-plugins-inworld (>=1.2.8)"]
-langchain = ["livekit-plugins-langchain (>=1.2.8)"]
-lmnt = ["livekit-plugins-lmnt (>=1.2.8)"]
+inworld = ["livekit-plugins-inworld (>=1.2.14)"]
+langchain = ["livekit-plugins-langchain (>=1.2.14)"]
+lmnt = ["livekit-plugins-lmnt (>=1.2.14)"]
 mcp = ["mcp (>=1.10.0,<2) ; python_version >= \"3.10\""]
-mistralai = ["livekit-plugins-mistralai (>=1.2.8)"]
-neuphonic = ["livekit-plugins-neuphonic (>=1.2.8)"]
-nltk = ["livekit-plugins-nltk (>=1.2.8)"]
-openai = ["livekit-plugins-openai (>=1.2.8)"]
-playai = ["livekit-plugins-playai (>=1.2.8)"]
-resemble = ["livekit-plugins-resemble (>=1.2.8)"]
-rime = ["livekit-plugins-rime (>=1.2.8)"]
-sarvam = ["livekit-plugins-sarvam (>=1.2.8)"]
-silero = ["livekit-plugins-silero (>=1.2.8)"]
-simli = ["livekit-plugins-simli (>=1.2.8)"]
-smallestai = ["livekit-plugins-smallestai (>=1.2.8)"]
-speechify = ["livekit-plugins-speechify (>=1.2.8)"]
-speechmatics = ["livekit-plugins-speechmatics (>=1.2.8)"]
-spitch = ["livekit-plugins-spitch (>=1.2.8)"]
-tavus = ["livekit-plugins-tavus (>=1.2.8)"]
-turn-detector = ["livekit-plugins-turn-detector (>=1.2.8)"]
-upliftai = ["livekit-plugins-upliftai (>=1.2.8)"]
+minimax = ["livekit-plugins-minimax (>=1.2.14)"]
+mistralai = ["livekit-plugins-mistralai (>=1.2.14)"]
+neuphonic = ["livekit-plugins-neuphonic (>=1.2.14)"]
+nltk = ["livekit-plugins-nltk (>=1.2.14)"]
+openai = ["livekit-plugins-openai (>=1.2.14)"]
+playai = ["livekit-plugins-playai (>=1.2.14)"]
+resemble = ["livekit-plugins-resemble (>=1.2.14)"]
+rime = ["livekit-plugins-rime (>=1.2.14)"]
+sarvam = ["livekit-plugins-sarvam (>=1.2.14)"]
+silero = ["livekit-plugins-silero (>=1.2.14)"]
+simli = ["livekit-plugins-simli (>=1.2.14)"]
+smallestai = ["livekit-plugins-smallestai (>=1.2.14)"]
+soniox = ["livekit-plugins-soniox (>=1.2.14)"]
+speechify = ["livekit-plugins-speechify (>=1.2.14)"]
+speechmatics = ["livekit-plugins-speechmatics (>=1.2.14)"]
+spitch = ["livekit-plugins-spitch (>=1.2.14)"]
+tavus = ["livekit-plugins-tavus (>=1.2.14)"]
+turn-detector = ["livekit-plugins-turn-detector (>=1.2.14)"]
+ultravox = ["livekit-plugins-ultravox (>=1.2.14)"]
+upliftai = ["livekit-plugins-upliftai (>=1.2.14)"]
 
 [[package]]
 name = "livekit-api"
@@ -1900,55 +1905,55 @@ livekit = ">=0.21.3"
 
 [[package]]
 name = "livekit-plugins-openai"
-version = "1.2.8"
+version = "1.2.14"
 description = "Agent Framework plugin for services from OpenAI"
 optional = false
 python-versions = ">=3.9.0"
 groups = ["main"]
 files = [
-    {file = "livekit_plugins_openai-1.2.8-py3-none-any.whl", hash = "sha256:9916a02702ec980770f4d2320e2545ec198d5599d851c67722436f6a5c6d5d3d"},
-    {file = "livekit_plugins_openai-1.2.8.tar.gz", hash = "sha256:fd229357a7240b5097bef177e033c400d138b8cad0cb177949221dc329fe8278"},
+    {file = "livekit_plugins_openai-1.2.14-py3-none-any.whl", hash = "sha256:b80e2c7c1a932dbb968c665df4f1cab5e16b8b9bb0620e72f88936ea4ca7edfb"},
+    {file = "livekit_plugins_openai-1.2.14.tar.gz", hash = "sha256:70297df328878406abcd4eb680ad9ea770ae1a92be8bc590907f0ee364e65b00"},
 ]
 
 [package.dependencies]
-livekit-agents = {version = ">=1.2.8", extras = ["codecs", "images"]}
-openai = {version = ">=1.99.2", extras = ["realtime"]}
+livekit-agents = {version = ">=1.2.14", extras = ["codecs", "images"]}
+openai = {version = ">=1.107.2", extras = ["realtime"]}
 
 [package.extras]
 vertex = ["google-auth (>=2.0.0)"]
 
 [[package]]
 name = "livekit-plugins-silero"
-version = "1.2.8"
+version = "1.2.14"
 description = "Agent Framework Plugin for Silero"
 optional = false
 python-versions = ">=3.9.0"
 groups = ["main"]
 files = [
-    {file = "livekit_plugins_silero-1.2.8-py3-none-any.whl", hash = "sha256:d76f6466fdbc850f3549ad6b82abd4b826e654c8569e441ec7e7c9f25ab02951"},
-    {file = "livekit_plugins_silero-1.2.8.tar.gz", hash = "sha256:b386504e3c5714ffd3d92665456541e0b611820ba80ac86cbb186008e984e925"},
+    {file = "livekit_plugins_silero-1.2.14-py3-none-any.whl", hash = "sha256:b4a7dd4b61d1120c2bff6816e1716826d15d563f3d6e1acbad9a831acb281d31"},
+    {file = "livekit_plugins_silero-1.2.14.tar.gz", hash = "sha256:72a6802927beabf594522327d310e8e01f403766b4f4051f9ecc100203c5b2dd"},
 ]
 
 [package.dependencies]
-livekit-agents = ">=1.2.8"
+livekit-agents = ">=1.2.14"
 numpy = ">=1.26"
 onnxruntime = ">=1.18"
 
 [[package]]
 name = "livekit-plugins-turn-detector"
-version = "1.2.8"
+version = "1.2.14"
 description = "End of utterance detection for LiveKit Agents"
 optional = false
 python-versions = ">=3.9.0"
 groups = ["main"]
 files = [
-    {file = "livekit_plugins_turn_detector-1.2.8-py3-none-any.whl", hash = "sha256:8f75e9867eaf3acf9d4388bff6fbc955248fdbe15b7e209888cd5aa0a5731178"},
-    {file = "livekit_plugins_turn_detector-1.2.8.tar.gz", hash = "sha256:da75097074fde9dd7dc93574617103065b77cce0d8ae9ce5c2cc7f601fcd69d8"},
+    {file = "livekit_plugins_turn_detector-1.2.14-py3-none-any.whl", hash = "sha256:5e4e819f65d2b14e3e0eb852a52623e4722bb247d60e841457f2b878c87ad5c8"},
+    {file = "livekit_plugins_turn_detector-1.2.14.tar.gz", hash = "sha256:d4284e28c93cf485ecad3e235e4eb99389014531a5d07a91a539486aae1d29c7"},
 ]
 
 [package.dependencies]
 jinja2 = "*"
-livekit-agents = ">=1.2.8"
+livekit-agents = ">=1.2.14"
 numpy = ">=1.26"
 onnxruntime = ">=1.18"
 transformers = ">=4.47.1"
@@ -2544,14 +2549,14 @@ sympy = "*"
 
 [[package]]
 name = "openai"
-version = "1.108.1"
+version = "2.2.0"
 description = "The official Python library for the openai API"
 optional = false
 python-versions = ">=3.8"
 groups = ["main"]
 files = [
-    {file = "openai-1.108.1-py3-none-any.whl", hash = "sha256:952fc027e300b2ac23be92b064eac136a2bc58274cec16f5d2906c361340d59b"},
-    {file = "openai-1.108.1.tar.gz", hash = "sha256:6648468c1aec4eacfa554001e933a9fa075f57bacfc27588c2e34456cee9fef9"},
+    {file = "openai-2.2.0-py3-none-any.whl", hash = "sha256:d222e63436e33f3134a3d7ce490dc2d2f146fa98036eb65cc225df3ce163916f"},
+    {file = "openai-2.2.0.tar.gz", hash = "sha256:bc49d077a8bf0e370eec4d038bc05e232c20855a19df0b58e5b3e5a8da7d33e0"},
 ]
 
 [package.dependencies]
@@ -5188,4 +5193,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<3.11"
-content-hash = "aabe11710614f908188a700178486701c591879c1b7493b17cf4ad195e5bfe8c"
+content-hash = "37ecc79f4cebcf679082bfcefe9debf6be3b2a0e1850daf60af288565607cd50"

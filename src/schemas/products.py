@@ -1,6 +1,10 @@
 from typing import Literal, TypedDict
+from enum import Enum
 
-ProductType = Literal["basic", "variant", "customizable"]
+class ProductType(str, Enum):
+    BASIC = "basic"
+    VARIANT = "variant"
+    CUSTOMIZABLE = "customizable"
 
 
 class VectorProductMetadata(TypedDict):
