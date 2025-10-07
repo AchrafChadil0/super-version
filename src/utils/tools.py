@@ -297,6 +297,8 @@ def format_basic_single_product_for_llm(
     # Note about variants if applicable
     if product_details.get("has_variant"):
         lines.append("\n## Note")
-        lines.append("*This product has variants available and no options to add, it's a stand alone product*")
+        lines.append(
+            "*This product has variants available and no options to add, it's a stand alone product*"
+        )
 
     return "\n".join(lines)

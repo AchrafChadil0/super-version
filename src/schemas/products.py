@@ -1,5 +1,6 @@
-from typing import Literal, TypedDict
 from enum import Enum
+from typing import TypedDict
+
 
 class ProductType(str, Enum):
     BASIC = "basic"

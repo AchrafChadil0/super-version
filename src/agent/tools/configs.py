@@ -167,14 +167,11 @@ REDIRECT_TO_WEBSITE_PAGE = ToolConfig(
 )
 
 
-
-
 """
 All tool configurations for the Agent.
 Add new tools here
 """
 
-from . import ToolConfig
 
 # ============================================
 # ORDER TASK TOOLS (used inside OrderTask agent)
@@ -284,7 +281,6 @@ UNSELECT_OPTION = ToolConfig(
         'User: "Actually, no bacon" ← if bacon was previously selected\n→ unselect_option(group_id=3, option_id=7)',
         'User: "I dont want cheese anymore" ← if cheese was selected\n→ unselect_option(group_id=3, option_id=12)',
         'User: "Take off the onions" ← if onions were selected\n→ unselect_option(group_id=3, option_id=9)',
-
     ],
 )
 

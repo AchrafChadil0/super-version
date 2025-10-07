@@ -1,27 +1,15 @@
-import json
 import logging
 from datetime import datetime
 
-from livekit.agents import Agent, RunContext, ToolError, function_tool, get_job_context, NotGiven
-from livekit.rtc import RpcError
+from livekit.agents import Agent, RunContext, function_tool
 
-from src.agent.order_task import OrderTask
-from src.agent.state_manager import PerJobState
-from src.agent.tools import search_products
-from src.agent.tools.configs import REDIRECT_TO_PRODUCT_PAGE
-from src.devaito.services.products import (
-    get_basic_single_product_detail,
-    get_basic_variant_product_detail,
-    get_customizable_product_detail,
+from src.agent.tools import (
+    REDIRECT_TO_PRODUCT_PAGE,
+    SEARCH_PRODUCTS,
+    redirect_to_product_page_impl,
+    search_products_impl,
 )
-from src.models.order_models import OrderResult
 from src.schemas.products import ProductType
-from src.utils.tools import (
-    format_basic_single_product_for_llm,
-    format_basic_variant_product_for_llm,
-    format_customizable_product_for_llm,
-    log_to_file,
-)
 
 logger = logging.getLogger(__name__)
 
@@ -29,18 +17,25 @@ logger = logging.getLogger(__name__)
 class Assistant(Agent):
     """AI Assistant with vector database for product search and customization"""
 
-    def __init__(
-        self,
-        chat_ctx = None
-    ) -> None:
+    def __init__(self, chat_ctx=None) -> None:
         self.preferred_language: str = ""
         self.website_description: str = ""
         self.website_name: str = ""
 
-        super().__init__(
-            instructions=self._build_instructions(),
-            tools=[search_products],
-            chat_ctx=chat_ctx)
+        super().__init__(instructions=self._build_instructions(), chat_ctx=chat_ctx)
+
+    @function_tool(
+        name=SEARCH_PRODUCTS.name, description=SEARCH_PRODUCTS.to_description()
+    )
+    async def search_products(
+        self,
+        context: RunContext,
+        query: str,
+    ):
+        return await search_products_impl(
+            context=context,
+            query=query,
+        )
 
     @function_tool(
         name=REDIRECT_TO_PRODUCT_PAGE.name,
@@ -53,65 +48,13 @@ class Assistant(Agent):
         product_id: int,
         product_type: ProductType,
     ):
-        try:
-            state: PerJobState = context.userdata
-            website_name = state.website_name
-            room = get_job_context().room
-
-            if not room.remote_participants:
-                raise ToolError("No participants to redirect")
-
-            participant_identity = next(iter(room.remote_participants))
-
-            try:
-                await room.local_participant.perform_rpc(
-                    destination_identity=participant_identity,
-                    method="redirectToPage",
-                    payload=json.dumps({"url": redirect_url}),
-                )
-            except RpcError as e:
-                raise ToolError("Failed to redirect to product page") from e
-
-            if product_type == ProductType.BASIC:
-                product_details = await get_basic_single_product_detail(
-                    tenant_id=website_name, product_id=product_id
-                )
-                formated_details = format_basic_single_product_for_llm(
-                    product_details, currency=state.currency
-                )
-            elif product_type == ProductType.VARIANT:
-                product_details = await get_basic_variant_product_detail(
-                    tenant_id=website_name, product_id=product_id
-                )
-                formated_details = format_basic_variant_product_for_llm(
-                    product_details, currency=state.currency
-                )
-            elif product_type == ProductType.CUSTOMIZABLE:
-                product_details = await get_customizable_product_detail(
-                    tenant_id=website_name, product_id=product_id
-                )
-                formated_details = format_customizable_product_for_llm(
-                    product_details=product_details, currency=state.currency
-                )
-            else:
-                raise ValueError(f"Invalid product type: {product_type}")
-            log_to_file("7ALIM", formated_details)
-            return OrderTask(
-                product_name=product_details.get("product_name", "Product Name"),
-                product_details_summary=formated_details,
-                chat_ctx=self.chat_ctx,  # Pass the current chat context for continuity
-                product_type=product_type.lower(),
-                website_name=state.website_name,
-                website_description=state.website_description,
-                preferred_language=state.preferred_language,
-            )
-
-
-
-        except ToolError:
-            raise
-        except Exception as e:
-            raise ToolError("Product page redirect failed") from e
+        return await redirect_to_product_page_impl(
+            agent=self,
+            context=context,
+            redirect_url=redirect_url,
+            product_id=product_id,
+            product_type=product_type,
+        )
 
     def _build_instructions(self) -> str:
         """Build instructions with injected variables."""
@@ -136,7 +79,7 @@ You are a smart voice assistant for {self.website_name} that helps users find an
 
 ### Tool 1: `search_products(query, max_results=2)`
 
-**Trigger**: User mentions ANY product name, brand, category, or request.  
+**Trigger**: User mentions ANY product name, brand, category, or request.
 **Examples**: "burger", "nike shoes", "something spicy", "I want pizza"
 
 **Decision after search**:
@@ -149,7 +92,7 @@ You are a smart voice assistant for {self.website_name} that helps users find an
 
 ### Tool 2: `redirect_to_product_page(redirect_url, product_id, product_type)`
 
-**Trigger**: Immediately after `search_products` returns a product with `similarity_score >= 0.4`  
+**Trigger**: Immediately after `search_products` returns a product with `similarity_score >= 0.4`
 **Parameters**: Use EXACT values from search results (do not modify!)
 
 **Workflow**:
@@ -163,7 +106,7 @@ You are a smart voice assistant for {self.website_name} that helps users find an
 
 ### Tool 3: `redirect_to_website_page(redirect_url)`
 
-**Trigger**: User requests non-product pages (e.g., menu, about, contact, home)  
+**Trigger**: User requests non-product pages (e.g., menu, about, contact, home)
 **Examples**: "show me the menu", "take me home", "contact page"
 
 **Critical Rule**: Use this ONLY for general website pages — never for products.
@@ -174,49 +117,49 @@ You are a smart voice assistant for {self.website_name} that helps users find an
 
 ### Product Search → Redirect Flow
 
-**User**: "I want a burger"  
-**Assistant**:  
-"One moment while I search for a burger..."  
-→ `[search_products("burger")]`  
-→ Returns: `{{redirect_url, product_id: 123, product_type: "basic", similarity_score: 0.85}}`  
-"Found Buffalo Chicken Burger! Taking you there now."  
-→ `[redirect_to_product_page(redirect_url, 123, "basic")]`  
-→ Product details loaded automatically  
+**User**: "I want a burger"
+**Assistant**:
+"One moment while I search for a burger..."
+→ `[search_products("burger")]`
+→ Returns: `{{redirect_url, product_id: 123, product_type: "basic", similarity_score: 0.85}}`
+"Found Buffalo Chicken Burger! Taking you there now."
+→ `[redirect_to_product_page(redirect_url, 123, "basic")]`
+→ Product details loaded automatically
 → Discuss product or hand off to OrderTask
 
-**User**: "Show me nike shoes"  
-**Assistant**:  
-"One moment while I search for nike shoes..."  
-→ `[search_products("nike shoes")]`  
-→ Returns: `{{redirect_url, product_id: 456, product_type: "variant", similarity_score: 0.92}}`  
-"Found Nike Air Max! Opening it now."  
-→ `[redirect_to_product_page(redirect_url, 456, "variant")]`  
-→ Variant details (sizes, colors) loaded  
+**User**: "Show me nike shoes"
+**Assistant**:
+"One moment while I search for nike shoes..."
+→ `[search_products("nike shoes")]`
+→ Returns: `{{redirect_url, product_id: 456, product_type: "variant", similarity_score: 0.92}}`
+"Found Nike Air Max! Opening it now."
+→ `[redirect_to_product_page(redirect_url, 456, "variant")]`
+→ Variant details (sizes, colors) loaded
 → Help user select options
 
 ---
 
 ### Website Navigation Flow
 
-**User**: "Take me to the menu"  
-**Assistant**:  
-"Opening the menu now!"  
+**User**: "Take me to the menu"
+**Assistant**:
+"Opening the menu now!"
 → `[redirect_to_website_page("https://site.com/menu")]`
 
-**User**: "Go to contact page"  
-**Assistant**:  
-"Taking you to the contact page!"  
+**User**: "Go to contact page"
+**Assistant**:
+"Taking you to the contact page!"
 → `[redirect_to_website_page("https://site.com/contact")]`
 
 ---
 
 ### Low Similarity Flow
 
-**User**: "I want something exotic"  
-**Assistant**:  
-"One moment while I search..."  
-→ `[search_products("exotic")]`  
-→ Returns: `similarity_score: 0.25`  
+**User**: "I want something exotic"
+**Assistant**:
+"One moment while I search..."
+→ `[search_products("exotic")]`
+→ Returns: `similarity_score: 0.25`
 "I couldn't find a close match for 'exotic'. Could you try 'spicy dishes' or 'international cuisine'?"
 
 ---
@@ -224,9 +167,9 @@ You are a smart voice assistant for {self.website_name} that helps users find an
 ## Execution Guidelines
 
 ### Instant Actions — No Hesitation
-- "burger" → search + auto-redirect if score >= 0.4  
-- "I want X" → search X + auto-redirect  
-- "show me Y" → search Y + auto-redirect  
+- "burger" → search + auto-redirect if score >= 0.4
+- "I want X" → search X + auto-redirect
+- "show me Y" → search Y + auto-redirect
 - NEVER ask for confirmation before redirecting
 
 ### Keep User Informed During Tool Execution
@@ -238,15 +181,15 @@ ALWAYS say "One moment while I [action]..." using the user's EXACT request wordi
 NEVER stay silent during tool execution (>1 second)
 
 ### Using Search Results
-- Extract `redirect_url`, `product_id`, `product_type` from search results  
-- Pass them EXACTLY to `redirect_to_product_page` (do not modify!)  
-- Check `similarity_score` to decide whether to redirect  
+- Extract `redirect_url`, `product_id`, `product_type` from search results
+- Pass them EXACTLY to `redirect_to_product_page` (do not modify!)
+- Check `similarity_score` to decide whether to redirect
 - If score < 0.4, suggest alternative search terms
 
 ### Multi-Language Handling
-- Product names may be in their original language (keep as-is)  
-- Translate YOUR responses to {self.preferred_language}  
-- Explain prices and details in the user's language  
+- Product names may be in their original language (keep as-is)
+- Translate YOUR responses to {self.preferred_language}
+- Explain prices and details in the user's language
 - Adapt naturally to the user's speaking style
 
 ---
@@ -263,11 +206,11 @@ NEVER stay silent during tool execution (>1 second)
 
 ## Always Do
 
-- Act on first product mention  
-- Redirect automatically when score >= 0.4  
-- Use all three parameters for `redirect_to_product_page`  
-- Inform user during tool execution  
-- Speak in {self.preferred_language}  
-- Be fast, efficient, and proactive  
+- Act on first product mention
+- Redirect automatically when score >= 0.4
+- Use all three parameters for `redirect_to_product_page`
+- Inform user during tool execution
+- Speak in {self.preferred_language}
+- Be fast, efficient, and proactive
 - Extract exact values from tool responses
 """
