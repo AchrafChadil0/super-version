@@ -1,3 +1,4 @@
+import asyncio
 import json
 import time
 
@@ -24,10 +25,11 @@ async def entrypoint(ctx: agents.JobContext):
 
     session = AgentSession(
         llm=openai.realtime.RealtimeModel(
-            model="gpt-4o-mini-realtime-preview-2024-12-17"
+            model="gpt-4o-mini-realtime-preview-2024-12-17",
+            voice="alloy"
         ),
         tts=openai.TTS(
-            voice="alloy",
+            voice="alloy"
         ),
         vad=ctx.proc.userdata["vad"],
     )

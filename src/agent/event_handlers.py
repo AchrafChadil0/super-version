@@ -2,7 +2,7 @@ import asyncio
 import logging
 from typing import TYPE_CHECKING
 
-from livekit.agents import MetricsCollectedEvent
+from livekit.agents import MetricsCollectedEvent, AgentSession, UserStateChangedEvent
 
 from src.agent.metrics import MetricsProcessor
 
@@ -38,20 +38,41 @@ class EventHandlers:
         def on_data_received(data_packet):
             pass
 
-    def setup_session_handlers(self, session, start_time: float):
+    def setup_session_handlers(self, session: AgentSession, start_time: float):
         """Setup session-level event handlers"""
-
+        inactivity_task: asyncio.Task | None = None
         @session.on("metrics_collected")
         def on_metrics_collected(event: MetricsCollectedEvent):
             metrics_processor = MetricsProcessor(start_time=start_time)
             asyncio.create_task(metrics_processor.process_metrics(event))
 
-        @session.on("user_input_transcribed")
-        def on_user_input_transcribed(evt):
-            """Handle user speech transcription"""
-            pass
+        async def user_presence_task():
+            for _ in range(2):
+                await session.generate_reply(
+                    instructions=(
+                        "The user has been inactive. Politely check if the user is still present."
+                    )
+                )
+                await asyncio.sleep(15)
+            await session.generate_reply(
+                instructions=(
+                    "The user is away, we going to shutdown the session right now, say goodbye!"
+                )
+            )
+            session.shutdown()
 
-        @session.on("conversation_item_added")
-        def on_conversation_item_added(evt):
-            """Handle when conversation items are added"""
-            pass
+        @session.on("user_state_changed")
+        def _user_state_changed(ev: UserStateChangedEvent):
+            nonlocal inactivity_task
+            if ev.new_state == "away":
+                inactivity_task = asyncio.create_task(user_presence_task())
+                return
+
+            # ev.new_state: listening, speaking, ..
+            if inactivity_task is not None:
+                inactivity_task.cancel()
+
+
+
+
+
