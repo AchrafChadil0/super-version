@@ -10,6 +10,7 @@ from livekit.agents import (
 )
 from livekit.rtc import RpcError
 
+from ..agents.basic_order_task import BasicOrderTask
 from ...core.config import Config
 from ...data.vector_store import VectorStore
 from ...devaito.services.products import (
@@ -130,15 +131,26 @@ async def redirect_to_product_page_impl(
         else:
             raise ValueError(f"Invalid product type: {product_type}")
         log_to_file("7ALIM", formated_details)
-        return OrderTask(
-            product_name=product_details.get("product_name", "Product Name"),
-            product_details_summary=formated_details,
-            chat_ctx=chat_ctx,  # Pass the current chat context for continuity
-            product_type=product_type,
-            website_name=state.website_name,
-            website_description=state.website_description,
-            preferred_language=state.preferred_language,
-        )
+        if product_type == ProductType.BASIC:
+            return BasicOrderTask(
+                product_name=product_details.get("product_name", "Product Name"),
+                product_details_summary=formated_details,
+                chat_ctx=chat_ctx,  # Pass the current chat context for continuity
+                product_type=product_type,
+                website_name=state.website_name,
+                website_description=state.website_description,
+                preferred_language=state.preferred_language,
+            )
+        else:
+            return OrderTask(
+                product_name=product_details.get("product_name", "Product Name"),
+                product_details_summary=formated_details,
+                chat_ctx=chat_ctx,  # Pass the current chat context for continuity
+                product_type=product_type,
+                website_name=state.website_name,
+                website_description=state.website_description,
+                preferred_language=state.preferred_language,
+            )
 
     except ToolError:
         raise
