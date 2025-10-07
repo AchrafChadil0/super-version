@@ -49,7 +49,7 @@ class Assistant(Agent):
         product_type: ProductType,
     ):
         return await redirect_to_product_page_impl(
-            agent=self,
+            chat_ctx=self.chat_ctx,
             context=context,
             redirect_url=redirect_url,
             product_id=product_id,

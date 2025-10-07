@@ -5,7 +5,7 @@ from livekit import agents
 from livekit.agents import AgentSession, RoomInputOptions
 from livekit.plugins import noise_cancellation, openai, silero
 
-from src.agent.assistant import Assistant
+from src.agent.agents.assistant import Assistant
 from src.agent.event_handlers import EventHandlers
 from src.agent.state_manager import PerJobState
 from src.core.config import Config

@@ -2,7 +2,6 @@ import json
 from typing import Any
 
 from livekit.agents import (
-    Agent,
     ChatContext,
     RunContext,
     ToolError,
@@ -80,14 +79,14 @@ async def redirect_to_website_page(
 
 
 async def redirect_to_product_page_impl(
-    agent: Agent,
+    chat_ctx: ChatContext,
     context: RunContext,
     redirect_url: str,
     product_id: int,
     product_type: ProductType,
 ):
     try:
-        from ..order_task import OrderTask
+        from src.agent.agents.order_task import OrderTask
 
         state: PerJobState = context.userdata
         website_name = state.website_name
@@ -134,7 +133,7 @@ async def redirect_to_product_page_impl(
         return OrderTask(
             product_name=product_details.get("product_name", "Product Name"),
             product_details_summary=formated_details,
-            chat_ctx=agent.chat_ctx,  # Pass the current chat context for continuity
+            chat_ctx=chat_ctx,  # Pass the current chat context for continuity
             product_type=product_type,
             website_name=state.website_name,
             website_description=state.website_description,
@@ -325,7 +324,7 @@ async def unselect_option_impl(
 async def complete_order_impl(
     chat_ctx: ChatContext, product_name: str, context: RunContext
 ):
-    from src.agent.assistant import Assistant
+    from src.agent.agents.assistant import Assistant
 
     room = get_job_context().room
     if not room.remote_participants:
@@ -356,7 +355,7 @@ async def complete_order_impl(
 async def exit_ordering_task_impl(
     chat_ctx: ChatContext, product_name: str, exist_reason: str
 ):
-    from src.agent.assistant import Assistant
+    from src.agent.agents.assistant import Assistant
 
     # Complete the task with the cancellation result
     return (

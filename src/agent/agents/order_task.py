@@ -2,6 +2,7 @@ import logging
 from typing import Any
 
 from livekit.agents import Agent, RunContext, function_tool
+from livekit.plugins import openai
 
 from src.agent.tools import (
     COMPLETE_ORDER,
@@ -56,6 +57,9 @@ class OrderTask(Agent):
 
         super().__init__(
             instructions=instructions,
+            llm=openai.realtime.RealtimeModel(
+                model="gpt-4o-mini-realtime-preview-2024-12-17", voice="cedar"
+            ),
             chat_ctx=chat_ctx,
         )
 
