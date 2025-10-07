@@ -400,3 +400,43 @@ EXIT_ORDERING_TASK = ToolConfig(
         'User: "What’s your contact number?"\n→ exit_ordering_task(exit_reason="asked unrelated question")',
     ],
 )
+
+
+END_SESSION = ToolConfig(
+    name="end_session",
+    purpose="End the conversation session when the user wants to completely stop interacting with the assistant.",
+    when_to_use=(
+        "Call when user explicitly wants to end the entire conversation, not just exit a task. "
+        "Examples: 'goodbye', 'I'm done', 'end chat', 'stop talking', 'close this', 'that's all', "
+        "'I don't need anything else', 'thanks, bye', 'see you later'."
+    ),
+    parameters={
+        "farewell_message": "Brief, friendly goodbye message to send before ending session (optional)",
+    },
+    execution_notes=[
+        "This is a terminal action - session cannot be resumed",
+        "Always send a polite farewell before shutting down",
+        "Distinguish from exit_ordering_task (which returns to main assistant)",
+        "Tool takes ~1 second to execute graceful shutdown",
+    ],
+    behavior_steps=[
+        "Validates user intent to end entire session (not just current task)",
+        "Sends farewell message to user",
+    ],
+    critical_rules=[
+        "NEVER call for ambiguous phrases like 'ok' or 'thanks' without clear goodbye intent",
+        "If user says 'goodbye' while in OrderTask, confirm: 'Do you want to end the order or end our chat entirely?'",
+        "Always be polite - this is the user's last interaction",
+        "Distinguish between: (1) exiting a task, (2) going back to browse, (3) ending session",
+        "Do NOT call if user just finished an order and might want to order more",
+    ],
+    examples=[
+        'User: "Goodbye"\n→ end_session(farewell_message="Goodbye! Thanks for shopping with us today!")',
+        'User: "That\'s all I need, thanks"\n→ end_session(farewell_message="You\'re welcome! Have a great day!")',
+        'User: "I\'m done here"\n→ end_session(farewell_message="Thanks for visiting! See you next time!")',
+        'User: "Close this"\n→ end_session(farewell_message="Closing now. Have a wonderful day!")',
+        'User: "Thanks, bye!" (after completing order)\n→ end_session(farewell_message="Thank you for your order! Goodbye!")',
+        '❌ WRONG - User: "Thanks" (after adding to cart)\n→ DO NOT end session - user might want to order more\n→ Instead say: "You\'re welcome! Anything else I can help you find?"',
+        '❌ WRONG - User in OrderTask: "I want to leave"\n→ DO NOT immediately end session\n→ First clarify: "Would you like to cancel this order, or end our conversation entirely?"',
+    ],
+)

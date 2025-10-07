@@ -337,7 +337,6 @@ async def complete_order_impl(
     chat_ctx: ChatContext, product_name: str, context: RunContext
 ):
     from src.agent.agents.assistant import Assistant
-
     room = get_job_context().room
     if not room.remote_participants:
         raise ToolError("No participants available")
@@ -374,3 +373,16 @@ async def exit_ordering_task_impl(
         Assistant(chat_ctx=chat_ctx),
         f"User exited customization for {product_name}, reason fot the user's exit {exist_reason}",
     )
+
+
+
+async def end_session_impl(context: RunContext):
+    try:
+        await context.session.generate_reply(
+            instructions=(
+                "We are ending the session right now, say goodbye!"
+            )
+        )
+        context.session.shutdown()
+    except Exception as e:
+        raise ToolError("Failed to shutdown") from e

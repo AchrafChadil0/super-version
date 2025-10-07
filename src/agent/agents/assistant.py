@@ -7,7 +7,7 @@ from src.agent.tools import (
     REDIRECT_TO_PRODUCT_PAGE,
     SEARCH_PRODUCTS,
     redirect_to_product_page_impl,
-    search_products_impl,
+    search_products_impl, END_SESSION, end_session_impl,
 )
 from src.schemas.products import ProductType
 
@@ -55,6 +55,13 @@ class Assistant(Agent):
             product_id=product_id,
             product_type=product_type,
         )
+
+    @function_tool(
+        name=END_SESSION.name,
+        description=END_SESSION.to_description(),
+    )
+    async def end_session(self, context: RunContext):
+        return await end_session_impl(context=context)
 
     def _build_instructions(self) -> str:
         """Build instructions with injected variables."""

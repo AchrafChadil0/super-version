@@ -8,7 +8,7 @@ from src.agent.tools import (
     COMPLETE_ORDER,
     DECREASE_PRODUCT_QUANTITY,
     EXIT_ORDERING_TASK,
-    INCREASE_PRODUCT_QUANTITY
+    INCREASE_PRODUCT_QUANTITY, END_SESSION, end_session_impl
 )
 from src.schemas.products import ProductType
 
@@ -103,6 +103,12 @@ class BasicOrderTask(Agent):
             exist_reason=exit_reason,
         )
 
+    @function_tool(
+        name=END_SESSION.name,
+        description=END_SESSION.to_description(),
+    )
+    async def end_session(self, context: RunContext):
+        return await end_session_impl(context=context)
     def _generate_instructions(self) -> str:
         """
         Generate dynamic instructions for the LLM based on the product details.
