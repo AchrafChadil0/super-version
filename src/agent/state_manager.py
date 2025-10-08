@@ -86,6 +86,8 @@ class PerJobState:
         room: rtc.Room,
         session: AgentSession,
         website_name: str,
+        database_name: str,
+        base_url: str,
         website_description: str,
         pages: list[dict],
         categories: list[dict],
@@ -95,11 +97,13 @@ class PerJobState:
         self.room: rtc.Room = room
         self.session: AgentSession = session
         self.website_name = website_name
+        self.database_name = database_name
         self.website_description = website_description
         self.pages = pages or []
         self.categories = categories or []
         self.preferred_language = preferred_language
         self.currency = currency
+        self.base_url = base_url
 
     async def send_data_to_participants(self, data):
         """Enhanced send function with ParseIntError prevention"""

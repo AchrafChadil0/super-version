@@ -302,3 +302,30 @@ def format_basic_single_product_for_llm(
         )
 
     return "\n".join(lines)
+
+
+def add_https_to_hostname(domain: str) -> str:
+    """you pass it picks.devaito.com it returns https://picksssss.devaito.com"""
+    # Remove any existing protocol or trailing slashes
+    domain = domain.strip().removeprefix("http://").removeprefix("https://").rstrip("/")
+    # Add https:// at the start and
+    return f"https://{domain}"
+
+
+def format_pages_for_prompt(pages, base_url) -> str:
+    """Format pages data for the prompt"""
+    if not pages:
+        return "No pages available."
+    formatted = []
+    for page in pages:
+        name = page.get("name", "Unnamed Page")
+        url = page.get("url", "#")
+        description = page.get("description", "")
+        keywords = page.get("keywords", [])
+        page_info = f"- {name} (redirect_url: {base_url}{url})"
+        if description:
+            page_info += f": {description}"
+        if keywords:
+            page_info += f" [Keywords: {', '.join(keywords)}]"
+        formatted.append(page_info)
+    return "\n".join(formatted)

@@ -26,7 +26,6 @@ from ...utils.tools import (
     log_to_file,
 )
 from ..state_manager import PerJobState
-from .configs import REDIRECT_TO_WEBSITE_PAGE
 
 
 async def search_products_impl(
@@ -34,11 +33,11 @@ async def search_products_impl(
     query: str,
 ):
     state: PerJobState = context.userdata
-    website_name = state.website_name
+    database_name = state.website_name
 
     vector_store = VectorStore(
         collection_name="products",
-        persist_directory=f"vdbs/{website_name}",
+        persist_directory=f"vdbs/{database_name}",
         openai_api_key=Config.OPENAI_API_KEY,
     )
     # Perform semantic search
@@ -46,11 +45,8 @@ async def search_products_impl(
     return products
 
 
-@function_tool(
-    name=REDIRECT_TO_WEBSITE_PAGE.name,
-    description=REDIRECT_TO_WEBSITE_PAGE.to_description(),
-)
-async def redirect_to_website_page(
+
+async def redirect_to_website_page_impl(
     context: RunContext,
     redirect_url: str,
 ) -> dict[str, any]:
@@ -140,6 +136,7 @@ async def redirect_to_product_page_impl(
                 website_name=state.website_name,
                 website_description=state.website_description,
                 preferred_language=state.preferred_language,
+                state=state
             )
         else:
             return OrderTask(
@@ -150,6 +147,7 @@ async def redirect_to_product_page_impl(
                 website_name=state.website_name,
                 website_description=state.website_description,
                 preferred_language=state.preferred_language,
+                state=state
             )
 
     except ToolError:
@@ -364,13 +362,13 @@ async def complete_order_impl(
 
 
 async def exit_ordering_task_impl(
-    chat_ctx: ChatContext, product_name: str, exist_reason: str
+    chat_ctx: ChatContext, product_name: str, exist_reason: str, state: PerJobState
 ):
     from src.agent.agents.assistant import Assistant
 
     # Complete the task with the cancellation result
     return (
-        Assistant(chat_ctx=chat_ctx),
+        Assistant(chat_ctx=chat_ctx, state=state),
         f"User exited customization for {product_name}, reason fot the user's exit {exist_reason}",
     )
 

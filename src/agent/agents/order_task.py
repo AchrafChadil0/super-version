@@ -1,9 +1,10 @@
 import logging
+from pprint import pprint
 from typing import Any
 
 from livekit.agents import Agent, RunContext, function_tool
-from livekit.plugins import openai
 
+from src.agent.state_manager import PerJobState
 from src.agent.tools import (
     COMPLETE_ORDER,
     DECREASE_PRODUCT_QUANTITY,
@@ -19,7 +20,7 @@ from src.agent.tools import (
     select_option_impl,
     unselect_option_impl, END_SESSION,
 )
-from src.agent.tools.implementations import sync_order_options_impl, end_session_impl
+from src.agent.tools.implementations import sync_order_options_impl
 from src.schemas.products import ProductType
 
 logger = logging.getLogger(__name__)
@@ -40,6 +41,7 @@ class OrderTask(Agent):
         website_name: str,
         website_description: str,
         preferred_language: str,
+        state: PerJobState,
         chat_ctx=None,
     ):
         """
@@ -51,15 +53,13 @@ class OrderTask(Agent):
         self.website_name: str = website_name
         self.website_description: str = website_description
         self.preferred_language: str = preferred_language
+        self.state: PerJobState = state
 
         # Generate a dynamic, product-specific instruction for the LLM
         instructions = self._generate_instructions()
 
         super().__init__(
             instructions=instructions,
-            llm=openai.realtime.RealtimeModel(
-                model="gpt-4o-mini-realtime-preview-2024-12-17", voice="cedar"
-            ),
             chat_ctx=chat_ctx,
         )
 
@@ -142,6 +142,7 @@ class OrderTask(Agent):
             chat_ctx=self.chat_ctx,
             product_name=self.product_name,
             exist_reason=exist_reason,
+            state=self.state
         )
 
     @function_tool(
@@ -149,6 +150,7 @@ class OrderTask(Agent):
         description=END_SESSION.to_description(),
     )
     async def end_session(self, context: RunContext):
+        from src.agent.tools.implementations import end_session_impl
         return await end_session_impl(context=context)
     def _generate_instructions(self) -> str:
         """

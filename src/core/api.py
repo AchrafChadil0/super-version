@@ -7,7 +7,7 @@ from pydantic import BaseModel, HttpUrl
 
 from src.core.config import Config
 from src.data.db_to_vector import sync_products_to_vector_store
-from src.data.vector_store import VectorStore, sanitize_add_parent_dir
+from src.data.vector_store import VectorStore
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -17,8 +17,7 @@ logger = logging.getLogger(__name__)
 
 # Add new request model
 class SyncFromDatabaseRequest(BaseModel):
-    tenant_id: str
-    website_name: str
+    database_name: str
     base_url: HttpUrl
     clear_existing: bool = False
 
@@ -63,19 +62,19 @@ app.add_middleware(
 )
 
 
-def get_vector_store_instance(website_name: str):
+def get_vector_store_instance(database_name: str):
     """Create a new vector store instance for the specific website"""
-    persist_directory = sanitize_add_parent_dir(website_name)
+
 
     return VectorStore(
         collection_name=Config.CHROMA_COLLECTION_NAME,
-        persist_directory=persist_directory,
+        persist_directory=database_name,
         openai_api_key=Config.OPENAI_API_KEY,
     )
 
 
 @app.get("/health", response_model=HealthResponse)
-async def health_check(website_name: str):
+async def health_check():
     """Check if the API is healthy and ready"""
     try:
         return HealthResponse(
@@ -92,11 +91,11 @@ async def health_check(website_name: str):
 
 
 @app.get("/stats", response_model=ProductStatsResponse)
-async def get_product_stats(website_name: str):
+async def get_product_stats(database_name: str):
     """Get current statistics about products in the vector store"""
     try:
 
-        store = get_vector_store_instance(website_name)  # Create new instance
+        store = get_vector_store_instance(database_name)  # Create new instance
         stats = store.get_statistics()
 
         return ProductStatsResponse(
@@ -111,11 +110,11 @@ async def get_product_stats(website_name: str):
 
 
 @app.delete("/clear-products")
-async def clear_all_products(website_name: str):
+async def clear_all_products(database_name: str):
     """Clear all products from the vector store"""
     try:
 
-        store = get_vector_store_instance(website_name)  # Create new instance
+        store = get_vector_store_instance(database_name)  # Create new instance
 
         success = store.clear_collection()
 
@@ -137,12 +136,11 @@ async def sync_from_database(request: SyncFromDatabaseRequest):
     Fetches products from the tenant's database and adds them to ChromaDB
     """
     try:
-        logger.info(f"Starting database sync for tenant: {request.tenant_id}")
+        logger.info(f"Starting database sync for tenant: {request.database_name}")
 
         # Run sync
         result = await sync_products_to_vector_store(
-            tenant_id=request.tenant_id,
-            website_name=request.website_name,
+            database_name=request.database_name,
             base_url=str(request.base_url),
             clear_existing=request.clear_existing,
         )
@@ -150,7 +148,7 @@ async def sync_from_database(request: SyncFromDatabaseRequest):
         if result["success"]:
             return SyncFromDatabaseResponse(
                 success=True,
-                message=f"Successfully synced products for tenant {request.tenant_id}",
+                message=f"Successfully synced products for tenant {request.database_name}",
                 products_fetched=result["products_fetched"],
                 products_added=result["products_added"],
                 products_skipped=result["products_skipped"],

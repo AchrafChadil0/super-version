@@ -3,13 +3,16 @@ from datetime import datetime
 
 from livekit.agents import Agent, RunContext, function_tool
 
+from src.agent.state_manager import PerJobState
 from src.agent.tools import (
     REDIRECT_TO_PRODUCT_PAGE,
     SEARCH_PRODUCTS,
-    redirect_to_product_page_impl,
-    search_products_impl, END_SESSION, end_session_impl,
+    END_SESSION,
+    REDIRECT_TO_WEBSITE_PAGE
 )
 from src.schemas.products import ProductType
+from src.agent.static_data import PAGES
+from src.utils.tools import add_https_to_hostname, format_pages_for_prompt, log_to_file
 
 logger = logging.getLogger(__name__)
 
@@ -17,13 +20,10 @@ logger = logging.getLogger(__name__)
 class Assistant(Agent):
     """AI Assistant with vector database for product search and customization"""
 
-    def __init__(self, chat_ctx=None) -> None:
-        self.preferred_language: str = ""
-        self.website_description: str = ""
-        self.website_name: str = ""
+    def __init__(self, chat_ctx=None, state: PerJobState = None) -> None:
 
-        super().__init__(instructions=self._build_instructions(), chat_ctx=chat_ctx)
-
+        self.state: PerJobState = state
+        super().__init__(instructions=self.build_instructions(), chat_ctx=chat_ctx)
     @function_tool(
         name=SEARCH_PRODUCTS.name, description=SEARCH_PRODUCTS.to_description()
     )
@@ -32,6 +32,7 @@ class Assistant(Agent):
         context: RunContext,
         query: str,
     ):
+        from src.agent.tools import search_products_impl
         return await search_products_impl(
             context=context,
             query=query,
@@ -48,12 +49,25 @@ class Assistant(Agent):
         product_id: int,
         product_type: ProductType,
     ):
+        from src.agent.tools import redirect_to_product_page_impl
         return await redirect_to_product_page_impl(
             chat_ctx=self.chat_ctx,
             context=context,
             redirect_url=redirect_url,
             product_id=product_id,
             product_type=product_type,
+            state=self.state
+        )
+
+    @function_tool(
+        name=REDIRECT_TO_WEBSITE_PAGE.name,
+        description=REDIRECT_TO_WEBSITE_PAGE.to_description(),
+    )
+    async def redirect_to_website_page(self, context: RunContext, redirect_url: str):
+        from src.agent.tools import redirect_to_website_page_impl
+        return await redirect_to_website_page_impl(
+            context=context,
+            redirect_url=redirect_url
         )
 
     @function_tool(
@@ -61,24 +75,29 @@ class Assistant(Agent):
         description=END_SESSION.to_description(),
     )
     async def end_session(self, context: RunContext):
+        from src.agent.tools.implementations import end_session_impl
         return await end_session_impl(context=context)
 
-    def _build_instructions(self) -> str:
+    def build_instructions(self) -> str:
         """Build instructions with injected variables."""
+        pages = format_pages_for_prompt(PAGES, self.state.base_url)
         return f"""
 # Voice Assistant Instructions
 
-You are a smart voice assistant for {self.website_name} that helps users find and order products quickly and navigate between pages seamlessly.
+You are a smart voice assistant for {self.state.website_name} that helps users find and order products quickly and navigate between pages seamlessly.
 
 ## Language Settings
 
-- ALWAYS respond in {self.preferred_language} (ISO 639).
+- ALWAYS respond in {self.state.preferred_language} (ISO 639).
 - Adapt naturally to whatever language the user speaks.
 
 ## Context
 
-- WEBSITE DESCRIPTION: {self.website_description}
+- WEBSITE DESCRIPTION: {self.state.website_description}
 - CURRENT TIME: {datetime.now().isoformat()}
+- this is the Available Pages fro our website if you need the redirect_url of page, take it from these pages we listed :
+{pages}
+-- 
 
 ---
 
@@ -195,7 +214,7 @@ NEVER stay silent during tool execution (>1 second)
 
 ### Multi-Language Handling
 - Product names may be in their original language (keep as-is)
-- Translate YOUR responses to {self.preferred_language}
+- Translate YOUR responses to {self.state.preferred_language}
 - Explain prices and details in the user's language
 - Adapt naturally to the user's speaking style
 
@@ -217,7 +236,7 @@ NEVER stay silent during tool execution (>1 second)
 - Redirect automatically when score >= 0.4
 - Use all three parameters for `redirect_to_product_page`
 - Inform user during tool execution
-- Speak in {self.preferred_language}
+- Speak in {self.state.preferred_language}
 - Be fast, efficient, and proactive
 - Extract exact values from tool responses
 """

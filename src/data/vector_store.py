@@ -47,7 +47,7 @@ class VectorStore:
         if openai_api_key:
             self.embedding_function = embedding_functions.OpenAIEmbeddingFunction(
                 api_key=Config.OPENAI_API_KEY,
-                model_name="text-embedding-3-large",  # Cheaper and faster model
+                model_name="text-embedding-3-large",
             )
         else:
             # Fallback to default embedding if no API key

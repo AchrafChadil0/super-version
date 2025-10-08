@@ -54,14 +54,13 @@ def transform_product_to_vector_format(
 
 
 async def sync_products_to_vector_store(
-    tenant_id: str, website_name: str, base_url: str, clear_existing: bool = False
+    database_name: str, base_url: str, clear_existing: bool = False
 ) -> dict:
     """
     Fetch products from database and sync to vector store.
 
     Args:
-        tenant_id: Tenant identifier
-        website_name: Website name for vector store directory
+        database_name: Tenant identifier
         base_url: Website base URL
         clear_existing: Whether to clear existing products first
 
@@ -69,11 +68,11 @@ async def sync_products_to_vector_store(
         Dict with sync results
     """
     try:
-        logger.info(f"Starting sync for tenant: {tenant_id}")
+        logger.info(f"Starting sync for tenant: {database_name}")
 
         # Step 1: Fetch products from database
         logger.info("Fetching products from database...")
-        db_products = await get_all_products_for_vectors(tenant_id)
+        db_products = await get_all_products_for_vectors(database_name)
 
         if not db_products:
             logger.warning("No products found in database")
@@ -90,7 +89,7 @@ async def sync_products_to_vector_store(
 
         # Step 3: Initialize vector store
         logger.info("Initializing vector store...")
-        persist_directory = sanitize_add_parent_dir(website_name)
+        persist_directory = sanitize_add_parent_dir(database_name)
         vector_store = VectorStore(
             collection_name=Config.CHROMA_COLLECTION_NAME,
             persist_directory=persist_directory,
@@ -137,8 +136,7 @@ async def main():
 
     # Run sync
     result = await sync_products_to_vector_store(
-        tenant_id=tenant_id,
-        website_name=website_name,
+        database_name=tenant_id,
         base_url=base_url,
         clear_existing=False,  # Set to True to clear before syncing
     )

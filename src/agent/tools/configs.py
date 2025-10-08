@@ -128,7 +128,7 @@ REDIRECT_TO_WEBSITE_PAGE = ToolConfig(
         "requests navigation to non-product pages (home, menu, categories, about, contact)."
     ),
     parameters={
-        "redirect_url": "Exact page URL from find_website_page or known site structure",
+        "redirect_url": "Exact page URL of the page that the user want's",
     },
     execution_notes=[
         "Redirect happens instantly via RPC call",
@@ -155,13 +155,13 @@ REDIRECT_TO_WEBSITE_PAGE = ToolConfig(
     examples=[
         'User: "Show me the menu"\n'
         '→ find_website_page(query="menu") returns redirect_url\n'
-        '→ redirect_to_website_page(redirect_url="https://site.com/menu")\n'
+        '→ redirect_to_website_page(redirect_url)\n'
         '→ Say: "Opening the menu now!"',
         'User: "Take me to the about page"\n'
-        '→ redirect_to_website_page(redirect_url="https://site.com/about")\n'
+        '→ redirect_to_website_page(redirect_url)\n'
         '→ Say: "Taking you to our About page!"',
         'User: "Go back to home"\n'
-        '→ redirect_to_website_page(redirect_url="https://site.com")\n'
+        '→ redirect_to_website_page(redirect_url)\n'
         '→ Say: "Heading to the homepage!"',
     ],
 )

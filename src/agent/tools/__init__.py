@@ -11,11 +11,13 @@ from .configs import (
     COMPLETE_ORDER,
     EXIT_ORDERING_TASK,
     REDIRECT_TO_PRODUCT_PAGE,
+    REDIRECT_TO_WEBSITE_PAGE,
     END_SESSION
 )
 from .implementations import (
     search_products_impl,
     redirect_to_product_page_impl,
+    redirect_to_website_page_impl,
     increase_product_quantity_impl,
     decrease_product_quantity_impl,
     select_option_impl,
@@ -33,6 +35,7 @@ __all__ = [
     # Individual configs
     "SEARCH_PRODUCTS",
     "REDIRECT_TO_PRODUCT_PAGE",
+    "REDIRECT_TO_WEBSITE_PAGE",
     "SYNC_ORDER_OPTIONS",
     "INCREASE_PRODUCT_QUANTITY",
     "DECREASE_PRODUCT_QUANTITY",
@@ -44,6 +47,7 @@ __all__ = [
     # Implementations
     "search_products_impl",
     "redirect_to_product_page_impl",
+    "redirect_to_website_page_impl",
     "increase_product_quantity_impl",
     "decrease_product_quantity_impl",
     "select_option_impl",
