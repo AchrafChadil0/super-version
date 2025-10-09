@@ -12,14 +12,14 @@ logger = logging.getLogger(__name__)
 
 
 def transform_product_to_vector_format(
-    product: ProductForVectorDict, base_url: str
+    product: ProductForVectorDict, hostname: str
 ) -> VectorProductFormat:
     """
     Transform database product to vector store format.
 
     Args:
         product: Product from database
-        base_url: Website base URL
+        hostname: Website hostname
 
     Returns:
         Product formatted for vector store
@@ -39,7 +39,7 @@ def transform_product_to_vector_format(
         product_type = "basic"
 
     # Build URLs
-    redirect_url = f"{base_url.rstrip('/')}/product/{product['product_permalink']}"
+    redirect_url = f"https://{hostname}/product/{product['product_permalink']}"
 
     return {
         "id": str(product["product_id"]),
@@ -54,15 +54,15 @@ def transform_product_to_vector_format(
 
 
 async def sync_products_to_vector_store(
-    database_name: str, base_url: str, clear_existing: bool = False
+    database_name: str, clear_existing: bool = False, hostname: str = None
 ) -> dict:
     """
     Fetch products from database and sync to vector store.
 
     Args:
         database_name: Tenant identifier
-        base_url: Website base URL
         clear_existing: Whether to clear existing products first
+        hostname: Website hostname
 
     Returns:
         Dict with sync results
@@ -83,7 +83,7 @@ async def sync_products_to_vector_store(
         # Step 2: Transform products to vector format
         logger.info("Transforming products...")
         vector_products = [
-            transform_product_to_vector_format(product, base_url)
+            transform_product_to_vector_format(product, hostname=hostname)
             for product in db_products
         ]
 
@@ -127,32 +127,3 @@ async def sync_products_to_vector_store(
         return {"success": False, "error": str(e)}
 
 
-async def main():
-    """Test the sync function"""
-    # Configuration
-    tenant_id = "picksssss"  # Replace with your tenant ID
-    website_name = "picksssss"  # Replace with your website name
-    base_url = "https://picksssss.devaito.com"  # Replace with your website URL
-
-    # Run sync
-    result = await sync_products_to_vector_store(
-        database_name=tenant_id,
-        base_url=base_url,
-        clear_existing=False,  # Set to True to clear before syncing
-    )
-
-    # Print results
-    print("\nSync Results:")
-    print("-" * 50)
-    if result["success"]:
-        print(f"Success: {result['success']}")
-        print(f"Products Fetched: {result['products_fetched']}")
-        print(f"Products Added: {result['products_added']}")
-        print(f"Products Skipped: {result['products_skipped']}")
-        print(f"Total in Vector DB: {result['total_in_vector_db']}")
-    else:
-        print(f"Failed: {result['error']}")
-
-
-if __name__ == "__main__":
-    asyncio.run(main())

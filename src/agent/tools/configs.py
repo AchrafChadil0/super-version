@@ -367,23 +367,26 @@ COMPLETE_ORDER = ToolConfig(
 
 EXIT_ORDERING_TASK = ToolConfig(
     name="exit_ordering_task",
-    purpose="Cancel the current ordering task and return to the main assistant.",
+    purpose="Cancel the current ordering task and return to the main assistant ONLY after user confirmation.",
     when_to_use=(
-        "When user says 'never mind', 'go back', 'I changed my mind', 'show me something else', "
-        "or asks unrelated questions (e.g., 'what’s your return policy?')."
+        "When user CLEARLY wants a completely different product after confirmation. "
+        "Be aware of potential STT errors - if something seems out of context, clarify first. "
+        "ALWAYS ASK FOR CONFIRMATION FIRST."
     ),
     parameters={
         "exit_reason": "Brief string explaining why user exited (for logging/analytics)",
     },
     execution_notes=[
-        "Gracefully cancels customization",
-        "Does NOT add anything to cart",
-        "Returns control to main Assistant agent",
+        "This is a two-step process: ASK first, then EXIT only if confirmed",
+        "Consider if request seems contextually odd before assuming user wants to leave",
+        "Never exit without explicit user confirmation",
     ],
     behavior_steps=[
-        "Logs exit reason",
-        "Signals task completion with cancellation status",
-        "Main agent resumes handling general requests",
+        "1. EVALUATE if request fits current customization context",
+        "2. If request seems unrelated to current product, CLARIFY intent",
+        "3. Check if mentioned item could be an option/variant vs completely different product",
+        "4. ALWAYS CONFIRM before exiting",
+        "5. Continue customization if user clarifies they meant an option",
     ],
     response_format={
         "status": "'cancelled'",
@@ -391,17 +394,58 @@ EXIT_ORDERING_TASK = ToolConfig(
         "product": "string - Product name that was being customized",
     },
     critical_rules=[
-        "Call immediately on off-topic or cancellation cues",
-        "Do not try to recover or upsell — respect user’s intent to leave",
-        "Always confirm intent if ambiguous (e.g., 'Would you like to go back to browsing?') before exiting",
+        "If request seems out of context for current product:",
+        "  - First CLARIFY what user meant",
+        "  - Don't assume it's a different product",
+        "  - Could be STT error or misunderstanding",
+        "Pattern for clarification:",
+        "  - 'I heard [X] - is that something you want to add to this [product], or did you want to look for something else?'",
+        "  - 'Did you mean [X] as an option for your [current product]?'",
+        "  - 'Just to clarify - are you customizing your [current product] or looking for a different item?'",
+        "NEVER auto-exit on ambiguous requests",
+        "ALWAYS require explicit confirmation to exit",
+        "Single words out of context are often STT errors - always clarify",
+    ],
+    contextual_awareness=[
+        "Consider if the request makes sense for the current product type",
+        "Single unexpected words are often misrecognitions - clarify don't exit",
+        "Check product's available options before assuming user wants different product",
+        "If user mentions something that COULD be an option, ask if they meant it as customization",
     ],
     examples=[
-        'User: "Actually, I want to look for pizza instead"\n→ exit_ordering_task(exit_reason="wants different product")',
-        'User: "What’s your contact number?"\n→ exit_ordering_task(exit_reason="asked unrelated question")',
+        # Out of context word - Clarify
+        'User (customizing product): "I want extra [unexpected word]"\n'
+        '→ CLARIFY: "I heard [unexpected word] - could you clarify what you\'d like to add?"\n'
+        '→ User clarifies their intent\n'
+        '→ Proceed based on clarification',
+
+        # Ambiguous request
+        'User (customizing laptop): "Actually blue"\n'
+        '→ CLARIFY: "Did you want the blue color option for this laptop?"\n'
+        '→ User: "Yes, blue color"\n'
+        '→ DO NOT EXIT - select blue option',
+
+        # Clear different product
+        'User (customizing shirt): "Forget this, show me pants"\n'
+        '→ CONFIRM: "Would you like to cancel this shirt and look at pants instead?"\n'
+        '→ User: "Yes please"\n'
+        '→ exit_ordering_task(exit_reason="switching to pants")',
+
+        # Unclear single word
+        'User (customizing): Says single word that doesn\'t match any option\n'
+        '→ CLARIFY: "Could you tell me more about what you\'d like?"\n'
+        '→ Get clarification before considering exit',
+
+        # Never assume
+        '❌ WRONG: Auto-exit because word seems unrelated\n'
+        '✓ RIGHT: Ask "I heard [word] - what would you like to do with your current order?"',
+
+        # Context check
+        'User customizing any product: "[word that could be option or new product]"\n'
+        '→ ASK: "Is that something you want for your [current product], or were you looking for something else?"\n'
+        '→ Let user clarify their intent',
     ],
 )
-
-
 END_SESSION = ToolConfig(
     name="end_session",
     purpose="End the conversation session when the user wants to completely stop interacting with the assistant.",

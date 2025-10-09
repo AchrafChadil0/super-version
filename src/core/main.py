@@ -6,17 +6,23 @@ import time
 from livekit import agents
 from livekit.agents import AgentSession, RoomInputOptions
 from livekit.plugins import noise_cancellation, openai, silero
+from livekit.plugins.turn_detector.multilingual import MultilingualModel
 
 from src.agent.agents.assistant import Assistant
 from src.agent.event_handlers import EventHandlers
 from src.agent.state_manager import PerJobState
-from src.core.agent_session_config import AgentRealtimeSessionConfig
+from src.context_logger import setup_logging
+from src.core.agent_session_config import AgentRealtimeSessionConfig, AgentIntimeSessionConfig
 from src.core.config import Config
 from src.data.vector_store import VectorStore
 from src.data.db_to_vector import sync_products_to_vector_store
 from src.utils.tools import log_to_file, add_https_to_hostname
 
+
+setup_logging(log_level="INFO", log_dir="logs")
 logger = logging.getLogger(__name__)
+
+
 async def entrypoint(ctx: agents.JobContext):
     metadata = ctx.job.metadata or "{}"
     parsed_metadata = json.loads(metadata)
@@ -28,7 +34,7 @@ async def entrypoint(ctx: agents.JobContext):
     hostname = parsed_metadata.get("host")
     preferred_language = parsed_metadata.get("language", "en")
     database_name = parsed_metadata.get("database_name", "en")
-    log_to_file("parsed_metadata", parsed_metadata)
+    logger.info("parsed_metadata", extra={"parsed_metadata": parsed_metadata})
 
     try:
         # Ingest if there is no products
@@ -42,31 +48,33 @@ async def entrypoint(ctx: agents.JobContext):
         if stats["total_products"] == 0:
             # we ingest data if we don't find anything
             logger.warning(
-                "⚠️ Vector database is empty! Running ingestion automatically..."
+                "⚠️ Vector database is empty! Running ingestion automatically...", extra={"database_name": database_name, "base_url": hostname}
             )
             await sync_products_to_vector_store(
                 database_name=database_name,
-                base_url=hostname,
+                hostname=hostname,
                 clear_existing=False
             )
         else:
             logger.info(
-                f"✅ Vector database ready with {stats['total_products']} products"
+                f"✅ Vector database ready with {stats['total_products']} products", extra={"database_name": database_name, "base_url": hostname}
             )
     except Exception as e:
-        logger.error("something went wrong while trying to ingest data into vector db")
+        logger.exception("something went wrong while trying to ingest data into vector db")
 
-    session_config = AgentRealtimeSessionConfig()
-
+    #session_config = AgentRealtimeSessionConfig()
+    session_config = AgentIntimeSessionConfig()
     session = AgentSession(
-        llm=openai.realtime.RealtimeModel(
-            model=session_config.model_name,
+        llm=openai.LLM(model=session_config.model_name),
+        tts=openai.TTS(
+            model=session_config.tts_model,
             voice=session_config.voice
         ),
-        tts=openai.TTS(
-            voice=session_config.voice
+        stt=openai.STT(
+            model=session_config.stt_model
         ),
         vad=ctx.proc.userdata["vad"],
+        turn_detection=MultilingualModel(),
     )
     base_url = add_https_to_hostname(hostname)
     state = PerJobState(

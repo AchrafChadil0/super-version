@@ -126,7 +126,6 @@ async def redirect_to_product_page_impl(
             )
         else:
             raise ValueError(f"Invalid product type: {product_type}")
-        log_to_file("7ALIM", formated_details)
         if product_type == ProductType.BASIC:
             return BasicOrderTask(
                 product_name=product_details.get("product_name", "Product Name"),

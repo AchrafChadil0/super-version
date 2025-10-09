@@ -56,7 +56,6 @@ class Assistant(Agent):
             redirect_url=redirect_url,
             product_id=product_id,
             product_type=product_type,
-            state=self.state
         )
 
     @function_tool(

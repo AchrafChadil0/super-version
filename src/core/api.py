@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 # Add new request model
 class SyncFromDatabaseRequest(BaseModel):
     database_name: str
-    base_url: HttpUrl
+    hostname: str
     clear_existing: bool = False
 
 
@@ -127,7 +127,6 @@ async def clear_all_products(database_name: str):
         raise HTTPException(status_code=500, detail=str(e)) from e
 
 
-# Add this new endpoint
 @app.post("/sync-from-database", response_model=SyncFromDatabaseResponse)
 async def sync_from_database(request: SyncFromDatabaseRequest):
     """
@@ -141,7 +140,7 @@ async def sync_from_database(request: SyncFromDatabaseRequest):
         # Run sync
         result = await sync_products_to_vector_store(
             database_name=request.database_name,
-            base_url=str(request.base_url),
+            hostname=str(request.hostname),
             clear_existing=request.clear_existing,
         )
 

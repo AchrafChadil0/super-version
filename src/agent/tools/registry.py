@@ -10,6 +10,9 @@ class ToolConfig:
     parameters: dict[str, str]  # param_name: description
     behavior_steps: list[str]
     response_format: dict | None = None  # Expected return structure
+    validation_check: list[str]  | None = None
+    confirmation_templates: list[str]  | None = None
+    contextual_awareness: list[str]  | None = None
     critical_rules: list[str] | None = None
     examples: list[str] | None = None
     execution_notes: list[str] | None = None  # Timing, UI feedback, etc.
@@ -42,6 +45,22 @@ class ToolConfig:
         if self.response_format:
             parts.append("\nRESPONSE FORMAT:")
             parts.append(self._format_response_structure(self.response_format))
+
+
+        if self.validation_check:
+            parts.append("\nVALIDATION CHECK:")
+            for check in self.validation_check:
+                parts.append(f"- {check}")
+
+        if self.confirmation_templates:
+            parts.append("\nCONFIRMATION TEMPLATES:")
+            for template in self.confirmation_templates:
+                parts.append(f"- {template}")
+
+        if self.contextual_awareness:
+            parts.append("\nCONTEXTUAL AWARENESS:")
+            for awareness in self.contextual_awareness:
+                parts.append(f"- {awareness}")
 
         # Critical rules (decision logic)
         if self.critical_rules:
