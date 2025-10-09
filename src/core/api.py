@@ -49,7 +49,7 @@ class ProductStatsResponse(BaseModel):
 app = FastAPI(
     title="LiveKit Agent Vector Store API",
     description="API for updating product data in the vector database",
-    version="1.0.0",
+    version="1.0.0"
 )
 
 # Add CORS middleware
@@ -68,7 +68,7 @@ def get_vector_store_instance(database_name: str):
 
     return VectorStore(
         collection_name=Config.CHROMA_COLLECTION_NAME,
-        persist_directory=database_name,
+        persist_directory=f"vdbs/{database_name}",
         openai_api_key=Config.OPENAI_API_KEY,
     )
 
@@ -165,3 +165,28 @@ async def sync_from_database(request: SyncFromDatabaseRequest):
         return SyncFromDatabaseResponse(
             success=False, message="Internal server error", error=str(e)
         )
+
+@app.get("/search")
+async def search_products(
+    query: str,
+    website_name: str,
+    limit: int = 5,
+):
+    """Search for products in the vector store"""
+    try:
+        store = get_vector_store_instance(database_name=website_name)  # Create new instance
+
+        results = store.search_products(
+            query=query,
+            n_results=limit,
+        )
+
+        return {
+            "success": True,
+            "query": query,
+            "results": results,
+            "count": len(results),
+        }
+    except Exception as e:
+        logger.error(f"Error searching products: {e}")
+        raise HTTPException(status_code=500, detail=str(e)) from e

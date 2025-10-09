@@ -18,3 +18,7 @@ console:
 
 download:
 	python -m src.core.main download-files
+
+
+api:
+	 uvicorn src.core.api:app --host 0.0.0.0 --port 8001
