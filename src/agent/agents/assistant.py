@@ -1,7 +1,7 @@
 import logging
 from datetime import datetime
 
-from livekit.agents import Agent, RunContext, function_tool
+from livekit.agents import Agent, RunContext, function_tool, JobContext
 
 from src.agent.state_manager import PerJobState
 from src.agent.tools import (
@@ -75,7 +75,7 @@ class Assistant(Agent):
     )
     async def end_session(self, context: RunContext):
         from src.agent.tools.implementations import end_session_impl
-        return await end_session_impl(context=context)
+        return await end_session_impl(context=context, job_context=self.state.job_context)
 
     def build_instructions(self) -> str:
         """Build instructions with injected variables."""

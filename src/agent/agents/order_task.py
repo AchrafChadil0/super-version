@@ -151,7 +151,7 @@ class OrderTask(Agent):
     )
     async def end_session(self, context: RunContext):
         from src.agent.tools.implementations import end_session_impl
-        return await end_session_impl(context=context)
+        return await end_session_impl(context=context, job_context=self.state.job_context)
     def _generate_instructions(self) -> str:
         """
         Generate dynamic instructions for the LLM based on the product details.

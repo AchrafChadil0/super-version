@@ -3,8 +3,8 @@ import json
 import logging
 import time
 
-from livekit import agents
-from livekit.agents import AgentSession, RoomInputOptions
+from livekit import agents, rtc
+from livekit.agents import AgentSession, RoomInputOptions, RoomOutputOptions
 from livekit.plugins import noise_cancellation, openai, silero
 from livekit.plugins.turn_detector.multilingual import MultilingualModel
 
@@ -24,6 +24,7 @@ logger = logging.getLogger(__name__)
 
 
 async def entrypoint(ctx: agents.JobContext):
+    await ctx.connect()
     metadata = ctx.job.metadata or "{}"
     parsed_metadata = json.loads(metadata)
     currency = "$"
@@ -31,9 +32,9 @@ async def entrypoint(ctx: agents.JobContext):
     website_description = parsed_metadata.get(
         "description_website", Config.DEFAULT_WEBSITE_DESCRIPTION
     )
-    hostname = parsed_metadata.get("host")
+    hostname = parsed_metadata.get("host", "picksssss.devaito.com")
     preferred_language = parsed_metadata.get("language", "en")
-    database_name = parsed_metadata.get("database_name", "en")
+    database_name = parsed_metadata.get("database_name", "picksssss")
     logger.info("parsed_metadata", extra={"parsed_metadata": parsed_metadata})
 
     try:
@@ -85,6 +86,7 @@ async def entrypoint(ctx: agents.JobContext):
         base_url=base_url,
         website_description=website_description,
         preferred_language=preferred_language,
+        job_context=ctx,
         currency=currency,
         categories=[],
         pages=[],
@@ -99,12 +101,19 @@ async def entrypoint(ctx: agents.JobContext):
     event_handlers.setup_session_handlers(session, start_time)
 
     session.userdata = state
+
+    # start with audio disabled
+    session.input.set_audio_enabled(False)
+    session.output.set_audio_enabled(False)
+
+
     await session.start(
         room=ctx.room,
         agent=agent,
         room_input_options=RoomInputOptions(
             noise_cancellation=noise_cancellation.BVC(), close_on_disconnect=False
         ),
+        room_output_options=RoomOutputOptions(sync_transcription=False),
     )
 
     await session.generate_reply(
@@ -112,6 +121,11 @@ async def entrypoint(ctx: agents.JobContext):
                Communicate to the users in their preferred language (here is the 2 letter language ISO 639): {preferred_language}
                """,
     )
+
+    @ctx.room.local_participant.register_rpc_method("toggle_audio")
+    async def on_toggle_audio(data: rtc.RpcInvocationData) -> None:
+        session.input.set_audio_enabled(not session.input.audio_enabled)
+        session.output.set_audio_enabled(not session.output.audio_enabled)
 
 
 def prewarm(proc: agents.JobProcess):

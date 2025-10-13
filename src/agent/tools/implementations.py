@@ -6,7 +6,7 @@ from livekit.agents import (
     RunContext,
     ToolError,
     function_tool,
-    get_job_context,
+    get_job_context, JobContext,
 )
 from livekit.rtc import RpcError
 
@@ -373,13 +373,14 @@ async def exit_ordering_task_impl(
 
 
 
-async def end_session_impl(context: RunContext):
+async def end_session_impl(context: RunContext, job_context: JobContext):
     try:
         await context.session.generate_reply(
             instructions=(
                 "We are ending the session right now, say goodbye!"
             )
         )
-        context.session.shutdown()
+        job_context.shutdown(reason="Session ended")
+
     except Exception as e:
         raise ToolError("Failed to shutdown") from e

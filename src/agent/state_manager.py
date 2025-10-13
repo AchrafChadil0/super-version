@@ -5,7 +5,7 @@ import re
 from typing import Any
 
 from livekit import rtc
-from livekit.agents import AgentSession
+from livekit.agents import AgentSession, JobContext
 
 logger = logging.getLogger(__name__)
 
@@ -93,6 +93,7 @@ class PerJobState:
         categories: list[dict],
         preferred_language: str,
         currency: str,
+        job_context: JobContext = None
     ):
         self.room: rtc.Room = room
         self.session: AgentSession = session
@@ -104,6 +105,7 @@ class PerJobState:
         self.preferred_language = preferred_language
         self.currency = currency
         self.base_url = base_url
+        self.job_context = job_context
 
     async def send_data_to_participants(self, data):
         """Enhanced send function with ParseIntError prevention"""

@@ -2,9 +2,14 @@ import asyncio
 import logging
 from typing import TYPE_CHECKING
 
-from livekit.agents import MetricsCollectedEvent, AgentSession, UserStateChangedEvent
+from livekit import rtc
+from livekit.agents import MetricsCollectedEvent, AgentSession, UserStateChangedEvent, UserInputTranscribedEvent, \
+    ConversationItemAddedEvent
+from livekit.agents.llm import AudioContent
+from livekit.rtc import TranscriptionSegment, Participant, TrackPublication
 
 from src.agent.metrics import MetricsProcessor
+from src.utils.tools import log_to_file
 
 if TYPE_CHECKING:
     from state_manager import PerJobState
@@ -18,7 +23,7 @@ class EventHandlers:
     def __init__(self, state: "PerJobState"):
         self.state = state
 
-    def setup_room_handlers(self, room):
+    def setup_room_handlers(self, room: rtc.Room):
         """Setup room-level event handlers"""
 
         @room.on("participant_connected")
@@ -28,7 +33,7 @@ class EventHandlers:
 
         @room.on("participant_disconnected")
         def on_participant_disconnected(participant):
-            pass
+            logger.info(f"👋 Participant disconnected: {participant.identity}")
 
         @room.on("track_subscribed")
         def on_track_subscribed(track, publication, participant):
@@ -46,6 +51,20 @@ class EventHandlers:
             metrics_processor = MetricsProcessor(start_time=start_time)
             asyncio.create_task(metrics_processor.process_metrics(event))
 
+        async def send_user_input(text:str):
+            await self.state.room.local_participant.send_text(text=text, topic="user_input")
+        async def send_assistant_transcription(text:str):
+            await self.state.room.local_participant.send_text(text=text, topic="assistant_transcription")
+
+        @session.on("conversation_item_added")
+        def on_conversation_item_added(event: ConversationItemAddedEvent):
+            log_to_file(
+                f"Conversation item added from {event.item.role}: {event.item.text_content}. interrupted: {event.item.interrupted}", 111)
+            if event.item.role == "assistant":
+                asyncio.create_task(send_assistant_transcription(event.item.text_content))
+            else:
+                asyncio.create_task(send_user_input(event.item.text_content))
+
         async def user_presence_task():
             for _ in range(2):
                 await session.generate_reply(
@@ -59,9 +78,12 @@ class EventHandlers:
                     "The user is away, we going to shutdown the session right now, say goodbye!"
                 )
             )
-            session.shutdown()
+            await session.aclose()
 
-        @session.on("user_state_changed")
+
+
+        #@session.on("user_state_changed")
+        """
         def _user_state_changed(ev: UserStateChangedEvent):
             nonlocal inactivity_task
             if ev.new_state == "away":
@@ -71,6 +93,7 @@ class EventHandlers:
             # ev.new_state: listening, speaking, ..
             if inactivity_task is not None:
                 inactivity_task.cancel()
+        """
 
 
 

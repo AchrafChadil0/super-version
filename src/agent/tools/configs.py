@@ -446,6 +446,11 @@ EXIT_ORDERING_TASK = ToolConfig(
         '→ Let user clarify their intent',
     ],
 )
+
+
+# ============================================
+# END SESSION TOOL
+# ============================================
 END_SESSION = ToolConfig(
     name="end_session",
     purpose="End the conversation session when the user wants to completely stop interacting with the assistant.",
