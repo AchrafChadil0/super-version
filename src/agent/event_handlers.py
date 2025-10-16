@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 
 from livekit import rtc
 from livekit.agents import MetricsCollectedEvent, AgentSession, UserStateChangedEvent, UserInputTranscribedEvent, \
-    ConversationItemAddedEvent
+    ConversationItemAddedEvent, metrics
 from livekit.agents.llm import AudioContent
 from livekit.rtc import TranscriptionSegment, Participant, TrackPublication
 
@@ -48,6 +48,10 @@ class EventHandlers:
         inactivity_task: asyncio.Task | None = None
         @session.on("metrics_collected")
         def on_metrics_collected(event: MetricsCollectedEvent):
+            usage_collector = metrics.UsageCollector()
+            usage_collector.collect(event.metrics)
+            summary = usage_collector.get_summary()
+            log_to_file("metrics summary", summary)
             metrics_processor = MetricsProcessor(start_time=start_time)
             asyncio.create_task(metrics_processor.process_metrics(event))
 
@@ -58,32 +62,29 @@ class EventHandlers:
 
         @session.on("conversation_item_added")
         def on_conversation_item_added(event: ConversationItemAddedEvent):
-            log_to_file(
-                f"Conversation item added from {event.item.role}: {event.item.text_content}. interrupted: {event.item.interrupted}", 111)
             if event.item.role == "assistant":
                 asyncio.create_task(send_assistant_transcription(event.item.text_content))
             else:
                 asyncio.create_task(send_user_input(event.item.text_content))
 
         async def user_presence_task():
-            for _ in range(2):
-                await session.generate_reply(
-                    instructions=(
-                        "The user has been inactive. Politely check if the user is still present."
-                    )
-                )
-                await asyncio.sleep(15)
             await session.generate_reply(
                 instructions=(
-                    "The user is away, we going to shutdown the session right now, say goodbye!"
+                    "The user has been inactive. Politely check if the user is still present."
                 )
             )
+            await asyncio.sleep(10)
+            await session.generate_reply(
+                instructions=(
+                    "The user is away, we going to shutdown the session right now, say goodbye! (be short don't say too much"
+                )
+            )
+            await asyncio.sleep(15)
             await session.aclose()
 
 
 
-        #@session.on("user_state_changed")
-        """
+        @session.on("user_state_changed")
         def _user_state_changed(ev: UserStateChangedEvent):
             nonlocal inactivity_task
             if ev.new_state == "away":
@@ -93,7 +94,7 @@ class EventHandlers:
             # ev.new_state: listening, speaking, ..
             if inactivity_task is not None:
                 inactivity_task.cancel()
-        """
+
 
 
 

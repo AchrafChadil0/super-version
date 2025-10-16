@@ -35,6 +35,7 @@ async def entrypoint(ctx: agents.JobContext):
     hostname = parsed_metadata.get("host", "picksssss.devaito.com")
     preferred_language = parsed_metadata.get("language", "en")
     database_name = parsed_metadata.get("database_name", "picksssss")
+    mode = parsed_metadata.get("mode", "text")
     logger.info("parsed_metadata", extra={"parsed_metadata": parsed_metadata})
 
     try:
@@ -102,10 +103,19 @@ async def entrypoint(ctx: agents.JobContext):
 
     session.userdata = state
 
-    # start with audio disabled
+    # by default, we disable the audio
     session.input.set_audio_enabled(False)
     session.output.set_audio_enabled(False)
 
+    available_modes = ["text", "voice"]
+
+    if mode not in available_modes:
+        raise ValueError(f"Invalid mode '{mode}'. Must be one of {available_modes}")
+
+    # if the mode is voice we will activate the audio
+    if mode == "voice":
+        session.input.set_audio_enabled(True)
+        session.output.set_audio_enabled(True)
 
     await session.start(
         room=ctx.room,
@@ -122,10 +132,6 @@ async def entrypoint(ctx: agents.JobContext):
                """,
     )
 
-    @ctx.room.local_participant.register_rpc_method("toggle_audio")
-    async def on_toggle_audio(data: rtc.RpcInvocationData) -> None:
-        session.input.set_audio_enabled(not session.input.audio_enabled)
-        session.output.set_audio_enabled(not session.output.audio_enabled)
 
 
 def prewarm(proc: agents.JobProcess):

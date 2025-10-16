@@ -12,7 +12,7 @@ from src.agent.tools import (
 )
 from src.schemas.products import ProductType
 from src.agent.static_data import PAGES
-from src.utils.tools import add_https_to_hostname, format_pages_for_prompt, log_to_file
+from src.utils.tools import format_pages_for_prompt
 
 logger = logging.getLogger(__name__)
 

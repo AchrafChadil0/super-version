@@ -181,10 +181,6 @@ async def sync_order_options_impl(context: RunContext):
         return {"success": False, "error": "Empty RPC response"}
     order_data: SyncResponse = json.loads(response)
     current_order = OrderState.from_sync_response(order_data)
-    log_to_file(
-        "OrderTask.sync_order_options(), self.current_order.to_summary()",
-        current_order.to_summary(),
-    )
     return {"success": True, "summary": current_order.to_summary()}
 
 

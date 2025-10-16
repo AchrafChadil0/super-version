@@ -1,8 +1,13 @@
 # Add this import at the top
+import datetime
+import json
 import logging
+import uuid
+from typing import Any
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from livekit import api
 from pydantic import BaseModel, HttpUrl
 
 from src.core.config import Config
@@ -190,3 +195,69 @@ async def search_products(
     except Exception as e:
         logger.error(f"Error searching products: {e}")
         raise HTTPException(status_code=500, detail=str(e)) from e
+
+
+# Pydantic model for request body validation (optional but recommended)
+class TokenRequest(BaseModel):
+    # Define your expected fields here based on what 'data' should contain
+    # For now, accepting any dict since the structure isn't specified
+    class Config:
+        extra = "allow"
+
+# Response model for better API documentation
+class TokenResponse(BaseModel):
+    token: str
+    room: str
+    identity: str
+
+@app.post('/generate-token', response_model=TokenResponse)
+async def generate_token(data: dict[str, Any] | None = None):
+    """
+    Alternative version that handles optional JSON payload.
+    """
+    try:
+        # Handle empty payload case
+        if not data:
+            raise HTTPException(status_code=400, detail="No JSON payload received")
+
+        # Generate room and identity
+        room_name = f"room-{uuid.uuid4().hex[:7]}"
+        identity = f"user-{uuid.uuid4().hex[:7]}"
+
+        # Create token with room-specific settings
+        token = api.AccessToken() \
+            .with_identity(identity) \
+            .with_name(identity) \
+            .with_room_config(api.RoomConfiguration(
+            name=room_name,
+            max_participants=1,
+            agents=[
+                api.RoomAgentDispatch(
+                    metadata=json.dumps(data),
+                )
+            ]
+        )) \
+            .with_grants(api.VideoGrants(
+            room_join=True,
+            room=room_name,
+            can_publish=True,
+            can_subscribe=True,
+            can_publish_data=True,
+        )) \
+            .with_ttl(datetime.timedelta(seconds=24 * 60 * 60))  # 24 hours
+
+        jwt_token = token.to_jwt()
+
+        print(f"Generated token for room: {room_name}, identity: {identity}")
+
+        return TokenResponse(
+            token=jwt_token,
+            room=room_name,
+            identity=identity
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Error generating token: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))

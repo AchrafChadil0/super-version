@@ -43,7 +43,7 @@ class MetricsProcessor:
 
     def metrics_to_table(self, metrics: RealtimeModelMetrics, start_time: float):
         # console = Console()
-
+        # log_to_file("metrics", pprint(metrics))
         table = Table(
             title="[bold blue]Realtime Model Metrics[/bold blue]",
             box=box.ROUNDED,
