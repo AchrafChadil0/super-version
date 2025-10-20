@@ -62,10 +62,11 @@ class EventHandlers:
 
         @session.on("conversation_item_added")
         def on_conversation_item_added(event: ConversationItemAddedEvent):
-            if event.item.role == "assistant":
-                asyncio.create_task(send_assistant_transcription(event.item.text_content))
-            else:
-                asyncio.create_task(send_user_input(event.item.text_content))
+            if self.state.current_mode == "text":
+                if event.item.role == "assistant":
+                    asyncio.create_task(send_assistant_transcription(event.item.text_content))
+                else:
+                    asyncio.create_task(send_user_input(event.item.text_content))
 
         async def user_presence_task():
             await session.generate_reply(
