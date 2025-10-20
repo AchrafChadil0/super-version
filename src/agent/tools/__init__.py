@@ -12,7 +12,8 @@ from .configs import (
     EXIT_ORDERING_TASK,
     REDIRECT_TO_PRODUCT_PAGE,
     REDIRECT_TO_WEBSITE_PAGE,
-    END_SESSION
+    END_SESSION,
+    INITIATE_PRODUCT_ORDER
 )
 from .implementations import (
     search_products_impl,
@@ -24,7 +25,8 @@ from .implementations import (
     unselect_option_impl,
     complete_order_impl,
     exit_ordering_task_impl,
-    end_session_impl
+    end_session_impl,
+    initiate_product_order_impl
 )
 # fmt: on
 # isort: on
@@ -44,9 +46,11 @@ __all__ = [
     "COMPLETE_ORDER",
     "EXIT_ORDERING_TASK",
     "END_SESSION",
+    "INITIATE_PRODUCT_ORDER",
     # Implementations
     "search_products_impl",
     "redirect_to_product_page_impl",
+    "initiate_product_order_impl",
     "redirect_to_website_page_impl",
     "increase_product_quantity_impl",
     "decrease_product_quantity_impl",
@@ -54,5 +58,5 @@ __all__ = [
     "unselect_option_impl",
     "complete_order_impl",
     "exit_ordering_task_impl",
-    "end_session_impl"
+    "end_session_impl",
 ]

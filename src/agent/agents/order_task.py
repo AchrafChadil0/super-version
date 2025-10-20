@@ -1,5 +1,4 @@
 import logging
-from pprint import pprint
 from typing import Any
 
 from livekit.agents import Agent, RunContext, function_tool
@@ -8,6 +7,7 @@ from src.agent.state_manager import PerJobState
 from src.agent.tools import (
     COMPLETE_ORDER,
     DECREASE_PRODUCT_QUANTITY,
+    END_SESSION,
     EXIT_ORDERING_TASK,
     INCREASE_PRODUCT_QUANTITY,
     SELECT_OPTION,
@@ -18,7 +18,7 @@ from src.agent.tools import (
     exit_ordering_task_impl,
     increase_product_quantity_impl,
     select_option_impl,
-    unselect_option_impl, END_SESSION,
+    unselect_option_impl,
 )
 from src.agent.tools.implementations import sync_order_options_impl
 from src.schemas.products import ProductType
@@ -142,7 +142,7 @@ class OrderTask(Agent):
             chat_ctx=self.chat_ctx,
             product_name=self.product_name,
             exist_reason=exist_reason,
-            state=self.state
+            state=self.state,
         )
 
     @function_tool(
@@ -151,7 +151,11 @@ class OrderTask(Agent):
     )
     async def end_session(self, context: RunContext):
         from src.agent.tools.implementations import end_session_impl
-        return await end_session_impl(context=context, job_context=self.state.job_context)
+
+        return await end_session_impl(
+            context=context, job_context=self.state.job_context
+        )
+
     def _generate_instructions(self) -> str:
         """
         Generate dynamic instructions for the LLM based on the product details.
@@ -163,15 +167,13 @@ class OrderTask(Agent):
 
 
     CRITICAL: The user ALREADY SELECTED this product. Don't second-guess their choice!
-    
+    ---
     If they originally said "I want a burger" and you're now on "PICKS BRGR" - THAT'S THE BURGER THEY WANTED!
     Don't exit thinking they want a different burger. This IS their burger.
-    
     ONLY exit if they give you a NEW instruction like:
-    - "Actually, show me pizza"  
+    - "Actually, show me pizza"
     - "Cancel this"
     - "I changed my mind"
-    
     NEVER exit because their original request seems "general" - it was already resolved by selecting THIS product.
     ---
 

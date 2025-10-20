@@ -16,7 +16,6 @@ class Config:
     # API Keys
     OPENAI_API_KEY = getenv("OPENAI_API_KEY")
 
-
     # Default Values
     DEFAULT_WEBSITE_NAME = "Our Website"
     DEFAULT_WEBSITE_DESCRIPTION = (
@@ -34,7 +33,6 @@ class Config:
         "EMBEDDING_MODEL", "text-embedding-3-large"
     )  # Changed to cheaper model
     EMBEDDING_BATCH_SIZE = int(getenv("EMBEDDING_BATCH_SIZE", "100"))
-
 
     @classmethod
     def validate(cls):

@@ -1,9 +1,10 @@
 """
 Simple Production-Ready Logging
 """
+
+import json
 import logging
 import logging.handlers
-import json
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -27,14 +28,33 @@ class JSONFormatter(logging.Formatter):
         # Add extra fields - they're stored directly on the record object
         # Standard LogRecord attributes to skip
         standard_attrs = {
-            'name', 'msg', 'args', 'created', 'filename', 'funcName', 'levelname',
-            'levelno', 'lineno', 'module', 'msecs', 'message', 'pathname', 'process',
-            'processName', 'relativeCreated', 'thread', 'threadName', 'exc_info',
-            'exc_text', 'stack_info', 'getMessage', 'taskName'
+            "name",
+            "msg",
+            "args",
+            "created",
+            "filename",
+            "funcName",
+            "levelname",
+            "levelno",
+            "lineno",
+            "module",
+            "msecs",
+            "message",
+            "pathname",
+            "process",
+            "processName",
+            "relativeCreated",
+            "thread",
+            "threadName",
+            "exc_info",
+            "exc_text",
+            "stack_info",
+            "getMessage",
+            "taskName",
         }
 
         for key, value in record.__dict__.items():
-            if key not in standard_attrs and not key.startswith('_'):
+            if key not in standard_attrs and not key.startswith("_"):
                 log_data[key] = value
 
         return json.dumps(log_data, default=str)
@@ -78,27 +98,31 @@ def setup_logging(log_level="INFO", log_dir="logs"):
     # Console handler - Shows EVERYTHING (no filter)
     console = logging.StreamHandler(sys.stdout)
     console.setLevel(log_level)
-    console.setFormatter(logging.Formatter(
-        '%(asctime)s [%(levelname)s] %(name)s: %(message)s',
-        datefmt='%Y-%m-%d %H:%M:%S'
-    ))
+    console.setFormatter(
+        logging.Formatter(
+            "%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+            datefmt="%Y-%m-%d %H:%M:%S",
+        )
+    )
     # No filter on console - shows all logs
     logger.addHandler(console)
 
     # Create filter for your app logs only
     # Adjust these prefixes to match your logger names
-    app_filter = AppOnlyFilter([
-        "src.",  # All loggers starting with "src."
-        "__main__",  # Main script
-        "__mp_main__",  # Multiprocessing main
-    ])
+    app_filter = AppOnlyFilter(
+        [
+            "src.",  # All loggers starting with "src."
+            "__main__",  # Main script
+            "__mp_main__",  # Multiprocessing main
+        ]
+    )
 
     # File handler - JSON format, rotating - ONLY YOUR APP LOGS
     file_handler = logging.handlers.RotatingFileHandler(
         log_path / "app.log",
         maxBytes=50 * 1024 * 1024,  # 50MB
         backupCount=5,
-        encoding='utf-8'
+        encoding="utf-8",
     )
     file_handler.setLevel(log_level)
     file_handler.setFormatter(JSONFormatter())
@@ -110,7 +134,7 @@ def setup_logging(log_level="INFO", log_dir="logs"):
         log_path / "error.log",
         maxBytes=10 * 1024 * 1024,  # 10MB
         backupCount=5,
-        encoding='utf-8'
+        encoding="utf-8",
     )
     error_handler.setLevel(logging.ERROR)
     error_handler.setFormatter(JSONFormatter())
@@ -119,19 +143,3 @@ def setup_logging(log_level="INFO", log_dir="logs"):
 
     return logger
 
-# Usage
-if __name__ == "__main__":
-    # Setup once at application startup
-    setup_logging(log_level="DEBUG", log_dir="logs")
-
-    # Use throughout your app
-    logger = logging.getLogger(__name__)
-
-    logger.info("Application started", extra={"user_id": "123", "action": "startup"})
-    logger.warning("This is a warning", extra={"threshold": 90, "current": 95})
-    logger.error("An error occurred", extra={"error_code": "DB_CONNECTION"})
-
-    try:
-        1 / 0
-    except Exception:
-        logger.exception("Caught exception", extra={"operation": "division"})

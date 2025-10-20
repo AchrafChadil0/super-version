@@ -50,7 +50,7 @@ SEARCH_PRODUCTS = ToolConfig(
 
 REDIRECT_TO_PRODUCT_PAGE = ToolConfig(
     name="redirect_to_product_page",
-    purpose="Navigate the user to a product page and fetch its complete details.",
+    purpose="Navigate the user's browser to a product page.",
     when_to_use=(
         "Call immediately after search_products returns a product with redirect_url, "
         "product_id, and product_type. Use this ONLY for products, NOT for general website pages."
@@ -60,66 +60,75 @@ REDIRECT_TO_PRODUCT_PAGE = ToolConfig(
         "product_id": "Unique product identifier (integer) from search_products",
         "product_type": "Product type enum: 'basic', 'variant', or 'customizable' (from search results)",
     },
-    execution_notes=[
-        "Tool takes 2-3 seconds (redirect + API fetch)",
-        "Say to user: 'Taking you to [product name] now!' or 'Opening [product name]!'",
-        "Product details are automatically fetched based on product_type",
-        "Different product types return different detail structures",
-    ],
-    behavior_steps=[
-        "Validates that remote participants exist in the room",
-        "Sends RPC command 'redirectToPage' to user's browser",
-        "Browser navigates to the product page",
-        "Fetches product details from API based on product_type:",
-        "Returns success with URL and full product details",
-    ],
     response_format={
-        "success": "boolean - True if redirect and fetch succeeded",
+        "success": "boolean - True if redirect command was sent successfully",
         "redirected_to": "string - Full product page URL",
-        "product_details": "dict - Complete product data (structure varies by product_type)",
+        "message": "string - Descriptive confirmation message including product_id and and product_type",
     },
     critical_rules=[
-        "NEVER ask 'Would you like to see this product?' - redirect immediately",
+        "NEVER ask for confirmation — redirect immediately if called",
         "MUST pass all three parameters: redirect_url, product_id, AND product_type",
         "Product_type MUST be one of: 'basic', 'variant', 'customizable' (case-sensitive)",
-        "Use exact values from search_products - don't guess or modify them",
-        "This tool is ONLY for products - use redirect_to_website_page for other pages",
-        "If no participants in room, raises ToolError automatically",
-        "If invalid product_type passed, raises ValueError",
+        "Use exact values from search_products — don't guess or modify them",
+        "This tool is ONLY for products — use redirect_to_website_page for other pages",
     ],
     examples=[
         'User: "Show me Nike shoes"\n'
         '→ search_products(query="Nike shoes") returns:\n'
-        '   {redirect_url: "https://site.com/nike", product_id: 123, product_type: "basic"}\n'
+        '   {redirect_url: "https://site.com/nike  ", product_id: 123, product_type: "basic"}\n'
         "→ redirect_to_product_page(\n"
-        '     redirect_url="https://site.com/nike",\n'
+        '     redirect_url="https://site.com/nike  ",\n'
         "     product_id=123,\n"
         '     product_type="basic"\n'
         "   )\n"
-        '→ Say: "Taking you to Nike Air Max now!"\n'
-        "→ Product details automatically loaded",
-        "After search finds variant product:\n"
-        "→ redirect_to_product_page(\n"
-        "     redirect_url=<from_search>,\n"
-        "     product_id=<from_search>,\n"
-        '     product_type="variant"  ← Note: different type\n'
-        "   )\n"
-        "→ Fetches variant-specific details (sizes, colors, etc.)",
-        "After search finds customizable product:\n"
-        "→ redirect_to_product_page(\n"
-        "     redirect_url=<from_search>,\n"
-        "     product_id=<from_search>,\n"
-        '     product_type="customizable"  ← Custom options\n'
-        "   )\n"
-        "→ Fetches customization options (toppings, add-ons, etc.)",
-        "Standard product flow:\n"
-        "1. User mentions product\n"
-        "2. search_products() returns {redirect_url, product_id, product_type}\n"
-        "3. redirect_to_product_page() with ALL THREE parameters\n"
-        "4. User sees page + you get full product details to discuss",
+        '→ Say: "Great choice! I’ve brought up a pair of Nike Air Max for you—take a look! 😊"\n'
+        '→ Once the page loads, gently ask: "How are you feeling about these? They’re super comfortable and a fan favorite!"\n'
+        "→ User sees product page. Agent waits for next user message.",
     ],
 )
 
+
+# configs.py
+
+INITIATE_PRODUCT_ORDER = ToolConfig(
+    name="initiate_product_order",
+    purpose="Fetch complete product details and hand off to the order agent for the currently viewed product.",
+    when_to_use=(
+        "Call ONLY after the user has been redirected to a product page AND explicitly or implicitly confirms "
+        "they want to proceed with that product (e.g., 'Yes', 'I want this', 'What's the price?', 'Order it'). "
+        "Requires that a pending product exists in the session state from a prior redirect."
+    ),
+    parameters={},
+    execution_notes=[
+        "Tool takes 2-3 seconds to fetch product details from backend",
+        "Say to user: 'Great! Let me get the details for [product name]...' or 'Processing your request for [product]...'",
+        "Automatically determines product type and fetches appropriate details",
+        "Returns a handoff object that transfers control to the order agent",
+    ],
+    behavior_steps=[
+        "Checks that state.pending_product exists and is not yet confirmed",
+        "Extracts product_id, product_type, and website_name from state",
+        "Fetches full product details based on product_type:",
+        "  - 'basic' → get_basic_single_product_detail",
+        "  - 'variant' → get_basic_variant_product_detail",
+        "  - 'customizable' → get_customizable_product_detail",
+        "Formats details for LLM consumption",
+        "Returns appropriate OrderTask object to hand off control",
+    ],
+    critical_rules=[
+        "MUST NOT be called before redirect_to_product_page has been used",
+    ],
+    examples=[
+        "User: 'Yes, I want those headphones'\n"
+        "→ initiate_product_order()\n"
+        "→ Fetches details for pending product ID 789\n"
+        "→ Returns BasicOrderTask → handoff to ordering flow",
+        "User: 'Do you have this burger with extra cheese?'\n"
+        "→ initiate_product_order()\n"
+        "→ Fetches customizable product details\n"
+        "→ Returns OrderTask with customization options enabled",
+    ],
+)
 REDIRECT_TO_WEBSITE_PAGE = ToolConfig(
     name="redirect_to_website_page",
     purpose="Navigate the user to a general website page (menu, about, contact, etc.).",
@@ -155,13 +164,13 @@ REDIRECT_TO_WEBSITE_PAGE = ToolConfig(
     examples=[
         'User: "Show me the menu"\n'
         '→ find_website_page(query="menu") returns redirect_url\n'
-        '→ redirect_to_website_page(redirect_url)\n'
+        "→ redirect_to_website_page(redirect_url)\n"
         '→ Say: "Opening the menu now!"',
         'User: "Take me to the about page"\n'
-        '→ redirect_to_website_page(redirect_url)\n'
+        "→ redirect_to_website_page(redirect_url)\n"
         '→ Say: "Taking you to our About page!"',
         'User: "Go back to home"\n'
-        '→ redirect_to_website_page(redirect_url)\n'
+        "→ redirect_to_website_page(redirect_url)\n"
         '→ Say: "Heading to the homepage!"',
     ],
 )
@@ -416,34 +425,29 @@ EXIT_ORDERING_TASK = ToolConfig(
         # Out of context word - Clarify
         'User (customizing product): "I want extra [unexpected word]"\n'
         '→ CLARIFY: "I heard [unexpected word] - could you clarify what you\'d like to add?"\n'
-        '→ User clarifies their intent\n'
-        '→ Proceed based on clarification',
-
+        "→ User clarifies their intent\n"
+        "→ Proceed based on clarification",
         # Ambiguous request
         'User (customizing laptop): "Actually blue"\n'
         '→ CLARIFY: "Did you want the blue color option for this laptop?"\n'
         '→ User: "Yes, blue color"\n'
-        '→ DO NOT EXIT - select blue option',
-
+        "→ DO NOT EXIT - select blue option",
         # Clear different product
         'User (customizing shirt): "Forget this, show me pants"\n'
         '→ CONFIRM: "Would you like to cancel this shirt and look at pants instead?"\n'
         '→ User: "Yes please"\n'
         '→ exit_ordering_task(exit_reason="switching to pants")',
-
         # Unclear single word
-        'User (customizing): Says single word that doesn\'t match any option\n'
+        "User (customizing): Says single word that doesn't match any option\n"
         '→ CLARIFY: "Could you tell me more about what you\'d like?"\n'
-        '→ Get clarification before considering exit',
-
+        "→ Get clarification before considering exit",
         # Never assume
-        '❌ WRONG: Auto-exit because word seems unrelated\n'
+        "❌ WRONG: Auto-exit because word seems unrelated\n"
         '✓ RIGHT: Ask "I heard [word] - what would you like to do with your current order?"',
-
         # Context check
         'User customizing any product: "[word that could be option or new product]"\n'
         '→ ASK: "Is that something you want for your [current product], or were you looking for something else?"\n'
-        '→ Let user clarify their intent',
+        "→ Let user clarify their intent",
     ],
 )
 

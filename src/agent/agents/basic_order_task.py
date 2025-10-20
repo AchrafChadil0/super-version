@@ -2,14 +2,14 @@ import logging
 from typing import Any
 
 from livekit.agents import Agent, RunContext, function_tool
-from livekit.plugins import openai
 
 from src.agent.state_manager import PerJobState
 from src.agent.tools import (
     COMPLETE_ORDER,
     DECREASE_PRODUCT_QUANTITY,
+    END_SESSION,
     EXIT_ORDERING_TASK,
-    INCREASE_PRODUCT_QUANTITY, END_SESSION
+    INCREASE_PRODUCT_QUANTITY,
 )
 from src.schemas.products import ProductType
 
@@ -67,6 +67,7 @@ class BasicOrderTask(Agent):
     )
     async def increase_product_quantity(self, context: RunContext) -> dict[str, Any]:
         from src.agent.tools.implementations import increase_product_quantity_impl
+
         return await increase_product_quantity_impl(
             product_type=self.product_type, context=context
         )
@@ -77,6 +78,7 @@ class BasicOrderTask(Agent):
     )
     async def decrease_product_quantity(self, context: RunContext) -> dict[str, Any]:
         from src.agent.tools.implementations import decrease_product_quantity_impl
+
         return await decrease_product_quantity_impl(
             product_type=self.product_type, context=context
         )
@@ -87,6 +89,7 @@ class BasicOrderTask(Agent):
     )
     async def complete_order(self, context: RunContext):
         from src.agent.tools.implementations import complete_order_impl
+
         return await complete_order_impl(
             chat_ctx=self.chat_ctx, product_name=self.product_name, context=context
         )
@@ -97,11 +100,12 @@ class BasicOrderTask(Agent):
     )
     async def exit_ordering_task(self, exit_reason: str):
         from src.agent.tools.implementations import exit_ordering_task_impl
+
         return await exit_ordering_task_impl(
             chat_ctx=self.chat_ctx,
             product_name=self.product_name,
             exist_reason=exit_reason,
-            state=self.state
+            state=self.state,
         )
 
     @function_tool(
@@ -110,7 +114,11 @@ class BasicOrderTask(Agent):
     )
     async def end_session(self, context: RunContext):
         from src.agent.tools.implementations import end_session_impl
-        return await end_session_impl(context=context, job_context=self.state.job_context)
+
+        return await end_session_impl(
+            context=context, job_context=self.state.job_context
+        )
+
     def _generate_instructions(self) -> str:
         """
         Generate dynamic instructions for the LLM based on the product details.
@@ -121,15 +129,12 @@ class BasicOrderTask(Agent):
 
 
     CRITICAL: The user ALREADY SELECTED this product. Don't second-guess their choice!
-    
     If they originally said "I want a PEPSI" and you're now on "PEPSI" - THAT'S THE PEPSI THEY WANTED!
     Don't exit thinking they want a different Product. This IS their product.
-    
     ONLY exit if they give you a NEW instruction like:
-    - "Actually, show me pizza"  
+    - "Actually, show me pizza"
     - "Cancel this"
     - "I changed my mind"
-    
     NEVER exit because their original request seems "general" - it was already resolved by selecting THIS product.
 ---
 

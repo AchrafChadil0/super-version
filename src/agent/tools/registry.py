@@ -8,11 +8,11 @@ class ToolConfig:
     purpose: str  # One-line summary
     when_to_use: str  # Clear trigger conditions
     parameters: dict[str, str]  # param_name: description
-    behavior_steps: list[str]
+    behavior_steps: list[str] | None = None
     response_format: dict | None = None  # Expected return structure
-    validation_check: list[str]  | None = None
-    confirmation_templates: list[str]  | None = None
-    contextual_awareness: list[str]  | None = None
+    validation_check: list[str] | None = None
+    confirmation_templates: list[str] | None = None
+    contextual_awareness: list[str] | None = None
     critical_rules: list[str] | None = None
     examples: list[str] | None = None
     execution_notes: list[str] | None = None  # Timing, UI feedback, etc.
@@ -45,7 +45,6 @@ class ToolConfig:
         if self.response_format:
             parts.append("\nRESPONSE FORMAT:")
             parts.append(self._format_response_structure(self.response_format))
-
 
         if self.validation_check:
             parts.append("\nVALIDATION CHECK:")

@@ -1,4 +1,3 @@
-import asyncio
 import logging
 
 from src.core.config import Config
@@ -125,5 +124,3 @@ async def sync_products_to_vector_store(
     except Exception as e:
         logger.error(f"Error during sync: {e}")
         return {"success": False, "error": str(e)}
-
-

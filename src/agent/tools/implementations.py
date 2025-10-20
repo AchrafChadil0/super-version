@@ -3,14 +3,13 @@ from typing import Any
 
 from livekit.agents import (
     ChatContext,
+    JobContext,
     RunContext,
     ToolError,
-    function_tool,
-    get_job_context, JobContext,
+    get_job_context,
 )
 from livekit.rtc import RpcError
 
-from ..agents.basic_order_task import BasicOrderTask
 from ...core.config import Config
 from ...data.vector_store import VectorStore
 from ...devaito.services.products import (
@@ -41,9 +40,8 @@ async def search_products_impl(
         openai_api_key=Config.OPENAI_API_KEY,
     )
     # Perform semantic search
-    products = vector_store.search_products(query=query, n_results=2)
+    products = vector_store.search_products(query=query, n_results=5)
     return products
-
 
 
 async def redirect_to_website_page_impl(
@@ -76,83 +74,144 @@ async def redirect_to_website_page_impl(
 
 
 async def redirect_to_product_page_impl(
-    chat_ctx: ChatContext,
     context: RunContext,
+    state: PerJobState,
     redirect_url: str,
     product_id: int,
     product_type: ProductType,
 ):
+    # Validate product_type early (even though we don't use it yet)
+    if product_type not in {
+        ProductType.BASIC,
+        ProductType.VARIANT,
+        ProductType.CUSTOMIZABLE,
+    }:
+        raise ValueError(f"Invalid product type: {product_type}")
+
+    state: PerJobState = context.userdata
+    room = get_job_context().room
+
+    if not room.remote_participants:
+        raise ToolError("No participants to redirect")
+
+    participant_identity = next(iter(room.remote_participants))
+
     try:
-        from src.agent.agents.order_task import OrderTask
+        await room.local_participant.perform_rpc(
+            destination_identity=participant_identity,
+            method="redirectToPage",
+            payload=json.dumps(
+                {"url": redirect_url.strip()}
+            ),  # sanitize trailing spaces
+        )
+    except RpcError as e:
+        raise ToolError("Failed to redirect to product page") from e
 
-        state: PerJobState = context.userdata
-        website_name = state.website_name
-        room = get_job_context().room
+    state.pending_product = {
+        "product_id": product_id,
+        "product_type": product_type,
+    }
+    return {
+        "success": True,
+        "redirected_to": redirect_url,
+        "message": f"Redirected to product page (ID: {product_id}, type: {product_type.value})",
+    }
 
-        if not room.remote_participants:
-            raise ToolError("No participants to redirect")
 
-        participant_identity = next(iter(room.remote_participants))
+async def initiate_product_order_impl(
+    chat_ctx: ChatContext,
+    context: RunContext,
+):
+    state: PerJobState = context.userdata
 
-        try:
-            await room.local_participant.perform_rpc(
-                destination_identity=participant_identity,
-                method="redirectToPage",
-                payload=json.dumps({"url": redirect_url}),
-            )
-        except RpcError as e:
-            raise ToolError("Failed to redirect to product page") from e
+    # 🔒 Critical: Ensure pending product exists
+    if not getattr(state, "pending_product", None):
+        raise ToolError(
+            "No pending product found. User must be redirected to a product page first."
+        )
 
+    pending = state.pending_product
+    product_id = pending.get("product_id")
+    product_type_str = pending.get("product_type")
+    website_name = state.website_name
+
+    if not product_id or not product_type_str:
+        raise ToolError("Incomplete pending product data")
+
+    try:
+        product_type = ProductType(product_type_str)
+    except ValueError:
+        raise ToolError(f"Invalid product type in pending  {product_type_str}") from None
+
+    # Fetch product details based on type
+
+    await state.session.generate_reply(
+        instructions="briefly inform the user that we are going to get the details for this current product."
+    )
+    try:
         if product_type == ProductType.BASIC:
             product_details = await get_basic_single_product_detail(
                 tenant_id=website_name, product_id=product_id
             )
-            formated_details = format_basic_single_product_for_llm(
+            formatted_details = format_basic_single_product_for_llm(
                 product_details, currency=state.currency
             )
         elif product_type == ProductType.VARIANT:
             product_details = await get_basic_variant_product_detail(
                 tenant_id=website_name, product_id=product_id
             )
-            formated_details = format_basic_variant_product_for_llm(
+            formatted_details = format_basic_variant_product_for_llm(
                 product_details, currency=state.currency
             )
         elif product_type == ProductType.CUSTOMIZABLE:
             product_details = await get_customizable_product_detail(
                 tenant_id=website_name, product_id=product_id
             )
-            formated_details = format_customizable_product_for_llm(
+            formatted_details = format_customizable_product_for_llm(
                 product_details=product_details, currency=state.currency
             )
         else:
-            raise ValueError(f"Invalid product type: {product_type}")
-        if product_type == ProductType.BASIC:
-            return BasicOrderTask(
-                product_name=product_details.get("product_name", "Product Name"),
-                product_details_summary=formated_details,
-                chat_ctx=chat_ctx,  # Pass the current chat context for continuity
-                product_type=product_type,
-                website_name=state.website_name,
-                website_description=state.website_description,
-                preferred_language=state.preferred_language,
-                state=state
-            )
-        else:
-            return OrderTask(
-                product_name=product_details.get("product_name", "Product Name"),
-                product_details_summary=formated_details,
-                chat_ctx=chat_ctx,  # Pass the current chat context for continuity
-                product_type=product_type,
-                website_name=state.website_name,
-                website_description=state.website_description,
-                preferred_language=state.preferred_language,
-                state=state
-            )
-
-    except ToolError:
-        raise
+            raise ToolError(f"Unsupported product type: {product_type}")
     except Exception as e:
-        raise ToolError("Product page redirect failed") from e
+        raise ToolError("Failed to fetch product details") from e
+
+    product_name = product_details.get("product_name", "Product")
+
+    # ✅ Mark as confirmed (optional, for audit)
+    # state.pending_product["confirmed"] = True
+
+    # 🤖 Hand off to order agent
+    from ..agents.basic_order_task import BasicOrderTask
+    from ..agents.order_task import OrderTask
+
+    if product_type == ProductType.BASIC:
+        order_task = BasicOrderTask(
+            product_name=product_name,
+            product_details_summary=formatted_details,
+            chat_ctx=chat_ctx,
+            product_type=product_type,
+            website_name=state.website_name,
+            website_description=state.website_description,
+            preferred_language=state.preferred_language,
+            state=state,
+        )
+    else:
+        order_task = OrderTask(
+            product_name=product_name,
+            product_details_summary=formatted_details,
+            chat_ctx=chat_ctx,
+            product_type=product_type,
+            website_name=state.website_name,
+            website_description=state.website_description,
+            preferred_language=state.preferred_language,
+            state=state,
+        )
+
+    return (
+        order_task,
+        product_name,
+        f"we successfully fetched the details for this {product_name}, now start helping the user ",
+    )
 
 
 # ============================================
@@ -330,6 +389,7 @@ async def complete_order_impl(
     chat_ctx: ChatContext, product_name: str, context: RunContext
 ):
     from src.agent.agents.assistant import Assistant
+
     room = get_job_context().room
     if not room.remote_participants:
         raise ToolError("No participants available")
@@ -368,13 +428,10 @@ async def exit_ordering_task_impl(
     )
 
 
-
 async def end_session_impl(context: RunContext, job_context: JobContext):
     try:
         await context.session.generate_reply(
-            instructions=(
-                "We are ending the session right now, say goodbye!"
-            )
+            instructions=("We are ending the session right now, say goodbye!")
         )
         job_context.shutdown(reason="Session ended")
 

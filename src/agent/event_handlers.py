@@ -3,10 +3,13 @@ import logging
 from typing import TYPE_CHECKING
 
 from livekit import rtc
-from livekit.agents import MetricsCollectedEvent, AgentSession, UserStateChangedEvent, UserInputTranscribedEvent, \
-    ConversationItemAddedEvent, metrics
-from livekit.agents.llm import AudioContent
-from livekit.rtc import TranscriptionSegment, Participant, TrackPublication
+from livekit.agents import (
+    AgentSession,
+    ConversationItemAddedEvent,
+    MetricsCollectedEvent,
+    UserStateChangedEvent,
+    metrics,
+)
 
 from src.agent.metrics import MetricsProcessor
 from src.utils.tools import log_to_file
@@ -46,6 +49,7 @@ class EventHandlers:
     def setup_session_handlers(self, session: AgentSession, start_time: float):
         """Setup session-level event handlers"""
         inactivity_task: asyncio.Task | None = None
+
         @session.on("metrics_collected")
         def on_metrics_collected(event: MetricsCollectedEvent):
             usage_collector = metrics.UsageCollector()
@@ -55,16 +59,23 @@ class EventHandlers:
             metrics_processor = MetricsProcessor(start_time=start_time)
             asyncio.create_task(metrics_processor.process_metrics(event))
 
-        async def send_user_input(text:str):
-            await self.state.room.local_participant.send_text(text=text, topic="user_input")
-        async def send_assistant_transcription(text:str):
-            await self.state.room.local_participant.send_text(text=text, topic="assistant_transcription")
+        async def send_user_input(text: str):
+            await self.state.room.local_participant.send_text(
+                text=text, topic="user_input"
+            )
+
+        async def send_assistant_transcription(text: str):
+            await self.state.room.local_participant.send_text(
+                text=text, topic="assistant_transcription"
+            )
 
         @session.on("conversation_item_added")
         def on_conversation_item_added(event: ConversationItemAddedEvent):
             if self.state.current_mode == "text":
                 if event.item.role == "assistant":
-                    asyncio.create_task(send_assistant_transcription(event.item.text_content))
+                    asyncio.create_task(
+                        send_assistant_transcription(event.item.text_content)
+                    )
                 else:
                     asyncio.create_task(send_user_input(event.item.text_content))
 
@@ -83,8 +94,6 @@ class EventHandlers:
             await asyncio.sleep(15)
             await session.aclose()
 
-
-
         @session.on("user_state_changed")
         def _user_state_changed(ev: UserStateChangedEvent):
             nonlocal inactivity_task
@@ -95,9 +104,3 @@ class EventHandlers:
             # ev.new_state: listening, speaking, ..
             if inactivity_task is not None:
                 inactivity_task.cancel()
-
-
-
-
-
-

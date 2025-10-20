@@ -8,7 +8,7 @@ from typing import Any
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from livekit import api
-from pydantic import BaseModel, HttpUrl
+from pydantic import BaseModel
 
 from src.core.config import Config
 from src.data.db_to_vector import sync_products_to_vector_store
@@ -54,7 +54,7 @@ class ProductStatsResponse(BaseModel):
 app = FastAPI(
     title="LiveKit Agent Vector Store API",
     description="API for updating product data in the vector database",
-    version="1.0.0"
+    version="1.0.0",
 )
 
 # Add CORS middleware
@@ -69,7 +69,6 @@ app.add_middleware(
 
 def get_vector_store_instance(database_name: str):
     """Create a new vector store instance for the specific website"""
-
 
     return VectorStore(
         collection_name=Config.CHROMA_COLLECTION_NAME,
@@ -171,6 +170,7 @@ async def sync_from_database(request: SyncFromDatabaseRequest):
             success=False, message="Internal server error", error=str(e)
         )
 
+
 @app.get("/search")
 async def search_products(
     query: str,
@@ -179,7 +179,9 @@ async def search_products(
 ):
     """Search for products in the vector store"""
     try:
-        store = get_vector_store_instance(database_name=website_name)  # Create new instance
+        store = get_vector_store_instance(
+            database_name=website_name
+        )  # Create new instance
 
         results = store.search_products(
             query=query,
@@ -204,13 +206,15 @@ class TokenRequest(BaseModel):
     class Config:
         extra = "allow"
 
+
 # Response model for better API documentation
 class TokenResponse(BaseModel):
     token: str
     room: str
     identity: str
 
-@app.post('/generate-token', response_model=TokenResponse)
+
+@app.post("/generate-token", response_model=TokenResponse)
 async def generate_token(data: dict[str, Any] | None = None):
     """
     Alternative version that handles optional JSON payload.
@@ -225,39 +229,41 @@ async def generate_token(data: dict[str, Any] | None = None):
         identity = f"user-{uuid.uuid4().hex[:7]}"
 
         # Create token with room-specific settings
-        token = api.AccessToken() \
-            .with_identity(identity) \
-            .with_name(identity) \
-            .with_room_config(api.RoomConfiguration(
-            name=room_name,
-            max_participants=1,
-            agents=[
-                api.RoomAgentDispatch(
-                    metadata=json.dumps(data),
+        token = (
+            api.AccessToken()
+            .with_identity(identity)
+            .with_name(identity)
+            .with_room_config(
+                api.RoomConfiguration(
+                    name=room_name,
+                    max_participants=1,
+                    agents=[
+                        api.RoomAgentDispatch(
+                            metadata=json.dumps(data),
+                        )
+                    ],
                 )
-            ]
-        )) \
-            .with_grants(api.VideoGrants(
-            room_join=True,
-            room=room_name,
-            can_publish=True,
-            can_subscribe=True,
-            can_publish_data=True,
-        )) \
-            .with_ttl(datetime.timedelta(seconds=24 * 60 * 60))  # 24 hours
+            )
+            .with_grants(
+                api.VideoGrants(
+                    room_join=True,
+                    room=room_name,
+                    can_publish=True,
+                    can_subscribe=True,
+                    can_publish_data=True,
+                )
+            )
+            .with_ttl(datetime.timedelta(seconds=24 * 60 * 60))
+        )  # 24 hours
 
         jwt_token = token.to_jwt()
 
         print(f"Generated token for room: {room_name}, identity: {identity}")
 
-        return TokenResponse(
-            token=jwt_token,
-            room=room_name,
-            identity=identity
-        )
+        return TokenResponse(token=jwt_token, room=room_name, identity=identity)
 
     except HTTPException:
         raise
     except Exception as e:
         print(f"Error generating token: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
