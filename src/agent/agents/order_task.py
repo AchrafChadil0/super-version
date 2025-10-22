@@ -67,9 +67,7 @@ class OrderTask(Agent):
         """
         Called when the task starts. Begin the customization dialogue.
         """
-        await self.session.generate_reply(
-            instructions=f"assist the user his product {self.product_name},  details: {self.product_details_summary}"
-        )
+
 
     @function_tool(
         name=SYNC_ORDER_OPTIONS.name, description=SYNC_ORDER_OPTIONS.to_description()

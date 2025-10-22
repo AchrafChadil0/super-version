@@ -144,10 +144,6 @@ async def initiate_product_order_impl(
         raise ToolError(f"Invalid product type in pending  {product_type_str}") from None
 
     # Fetch product details based on type
-
-    await state.session.generate_reply(
-        instructions="briefly inform the user that we are going to get the details for this current product."
-    )
     try:
         if product_type == ProductType.BASIC:
             product_details = await get_basic_single_product_detail(
@@ -404,9 +400,9 @@ async def complete_order_impl(
         )
         if not response:
             raise ToolError("Failed to add item to cart")
-
+        state: PerJobState = context.userdata
         return (
-            Assistant(chat_ctx=chat_ctx),
+            Assistant(chat_ctx=chat_ctx, state=state),
             f"the order has been successfully completed for {product_name},",
         )
 

@@ -56,8 +56,6 @@ class EventHandlers:
             usage_collector.collect(event.metrics)
             summary = usage_collector.get_summary()
             log_to_file("metrics summary", summary)
-            metrics_processor = MetricsProcessor(start_time=start_time)
-            asyncio.create_task(metrics_processor.process_metrics(event))
 
         async def send_user_input(text: str):
             await self.state.room.local_participant.send_text(
