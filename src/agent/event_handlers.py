@@ -83,13 +83,13 @@ class EventHandlers:
                     "The user has been inactive. Politely check if the user is still present."
                 )
             )
-            await asyncio.sleep(10)
+            await asyncio.sleep(25)
             await session.generate_reply(
                 instructions=(
                     "The user is away, we going to shutdown the session right now, say goodbye! (be short don't say too much"
                 )
             )
-            await asyncio.sleep(15)
+            await asyncio.sleep(25)
             await session.aclose()
 
         @session.on("user_state_changed")
