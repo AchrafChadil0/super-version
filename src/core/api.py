@@ -194,7 +194,7 @@ async def search_products(
         if manager_restaurant:
             results = [
                 r for r in results
-                if r.get("metadata", {}).get("product_type") != "basic"
+                if r.get("metadata", {}).get("product_type") not in ["basic", "variant"]
             ][:limit]  # on coupe à la limite finale
 
         return {

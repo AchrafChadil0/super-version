@@ -5,8 +5,8 @@ import os
 import time
 
 from livekit import agents
-from livekit.agents import AgentSession, RoomInputOptions, RoomOutputOptions
-from livekit.plugins import noise_cancellation, openai, silero
+from livekit.agents import AgentSession, RoomInputOptions, RoomOutputOptions, MetricsCollectedEvent, metrics
+from livekit.plugins import noise_cancellation, openai, silero, gladia, lmnt
 from livekit.plugins.turn_detector.multilingual import MultilingualModel
 from livekit.agents.telemetry import set_tracer_provider
 
@@ -21,7 +21,7 @@ from src.core.config import Config
 from src.data.db_to_vector import sync_products_to_vector_store
 from src.data.vector_store import VectorStore
 from src.devaito.services.products import get_tenant_categories
-from src.utils.tools import add_https_to_hostname
+from src.utils.tools import add_https_to_hostname, log_to_file
 
 setup_logging(log_level="INFO", log_dir="logs")
 logger = logging.getLogger(__name__)
@@ -145,6 +145,19 @@ async def entrypoint(ctx: agents.JobContext):
         session.input.set_audio_enabled(True)
         session.output.set_audio_enabled(True)
         state.current_mode = "voice"
+
+
+    usage_collector = metrics.UsageCollector()
+
+    @session.on("metrics_collected")
+    def on_metrics_collected(event: MetricsCollectedEvent):
+        usage_collector.collect(event.metrics)
+
+    async def log_usage():
+        summary = usage_collector.get_summary()
+        log_to_file("Usage:------", summary)
+
+    ctx.add_shutdown_callback(log_usage)
 
     await session.start(
         room=ctx.room,

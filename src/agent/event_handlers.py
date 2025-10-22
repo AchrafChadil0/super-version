@@ -11,8 +11,7 @@ from livekit.agents import (
     metrics,
 )
 
-from src.agent.metrics import MetricsProcessor
-from src.utils.tools import log_to_file
+
 
 if TYPE_CHECKING:
     from state_manager import PerJobState
@@ -49,13 +48,6 @@ class EventHandlers:
     def setup_session_handlers(self, session: AgentSession, start_time: float):
         """Setup session-level event handlers"""
         inactivity_task: asyncio.Task | None = None
-
-        @session.on("metrics_collected")
-        def on_metrics_collected(event: MetricsCollectedEvent):
-            usage_collector = metrics.UsageCollector()
-            usage_collector.collect(event.metrics)
-            summary = usage_collector.get_summary()
-            log_to_file("metrics summary", summary)
 
         async def send_user_input(text: str):
             await self.state.room.local_participant.send_text(
