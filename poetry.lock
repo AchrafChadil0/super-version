@@ -278,62 +278,62 @@ files = [
 
 [[package]]
 name = "av"
-version = "16.0.1"
+version = "15.1.0"
 description = "Pythonic bindings for FFmpeg's libraries."
 optional = false
-python-versions = ">=3.10"
+python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "av-16.0.1-cp310-cp310-macosx_11_0_x86_64.whl", hash = "sha256:8b141aaa29a3afc96a1d467d106790782c1914628b57309eaadb8c10c299c9c0"},
-    {file = "av-16.0.1-cp310-cp310-macosx_14_0_arm64.whl", hash = "sha256:4b8a08a59a5be0082af063d3f4b216e3950340121c6ea95b505a3f5f5cc8f21d"},
-    {file = "av-16.0.1-cp310-cp310-manylinux_2_28_aarch64.whl", hash = "sha256:792e7fc3c08eae005ff36486983966476e553cbb55aaeb0ec99adc4909377320"},
-    {file = "av-16.0.1-cp310-cp310-manylinux_2_28_x86_64.whl", hash = "sha256:4e8ef5df76d8d0ee56139789f80bb90ad1a82a7e6df6e080e2e95c06fa22aea7"},
-    {file = "av-16.0.1-cp310-cp310-musllinux_1_2_aarch64.whl", hash = "sha256:4f7a6985784a7464f078e419c71f5528c3e550ee5d605e7149b4a37a111eb136"},
-    {file = "av-16.0.1-cp310-cp310-musllinux_1_2_x86_64.whl", hash = "sha256:3f45c8d7b803b6faa2a25a26de5964a0a897de68298d9c9672c7af9d65d8b48a"},
-    {file = "av-16.0.1-cp310-cp310-win_amd64.whl", hash = "sha256:58e6faf1d9328d8cc6be14c5aadacb7d2965ed6d6ae1af32696993096543ff00"},
-    {file = "av-16.0.1-cp311-cp311-macosx_11_0_x86_64.whl", hash = "sha256:e310d1fb42879df9bad2152a8db6d2ff8bf332c8c36349a09d62cc122f5070fb"},
-    {file = "av-16.0.1-cp311-cp311-macosx_14_0_arm64.whl", hash = "sha256:2f4b357e5615457a84e6b6290916b22864b76b43d5079e1a73bc27581a5b9bac"},
-    {file = "av-16.0.1-cp311-cp311-manylinux_2_28_aarch64.whl", hash = "sha256:286665c77034c3a98080169b8b5586d5568a15da81fbcdaf8099252f2d232d7c"},
-    {file = "av-16.0.1-cp311-cp311-manylinux_2_28_x86_64.whl", hash = "sha256:f88de8e5b8ea29e41af4d8d61df108323d050ccfbc90f15b13ec1f99ce0e841e"},
-    {file = "av-16.0.1-cp311-cp311-musllinux_1_2_aarch64.whl", hash = "sha256:0cdb71ebe4d1b241cf700f8f0c44a7d2a6602b921e16547dd68c0842113736e1"},
-    {file = "av-16.0.1-cp311-cp311-musllinux_1_2_x86_64.whl", hash = "sha256:28c27a65d40e8cf82b6db2543f8feeb8b56d36c1938f50773494cd3b073c7223"},
-    {file = "av-16.0.1-cp311-cp311-win_amd64.whl", hash = "sha256:ffea39ac7574f234f5168f9b9602e8d4ecdd81853238ec4d661001f03a6d3f64"},
-    {file = "av-16.0.1-cp312-cp312-macosx_11_0_x86_64.whl", hash = "sha256:e41a8fef85dfb2c717349f9ff74f92f9560122a9f1a94b1c6c9a8a9c9462ba71"},
-    {file = "av-16.0.1-cp312-cp312-macosx_14_0_arm64.whl", hash = "sha256:6352a64b25c9f985d4f279c2902db9a92424e6f2c972161e67119616f0796cb9"},
-    {file = "av-16.0.1-cp312-cp312-manylinux_2_28_aarch64.whl", hash = "sha256:5201f7b4b5ed2128118cb90c2a6d64feedb0586ca7c783176896c78ffb4bbd5c"},
-    {file = "av-16.0.1-cp312-cp312-manylinux_2_28_x86_64.whl", hash = "sha256:daecc2072b82b6a942acbdaa9a2e00c05234c61fef976b22713983c020b07992"},
-    {file = "av-16.0.1-cp312-cp312-musllinux_1_2_aarch64.whl", hash = "sha256:6573da96e8bebc3536860a7def108d7dbe1875c86517072431ced702447e6aea"},
-    {file = "av-16.0.1-cp312-cp312-musllinux_1_2_x86_64.whl", hash = "sha256:4bc064e48a8de6c087b97dd27cf4ef8c13073f0793108fbce3ecd721201b2502"},
-    {file = "av-16.0.1-cp312-cp312-win_amd64.whl", hash = "sha256:0c669b6b6668c8ae74451c15ec6d6d8a36e4c3803dc5d9910f607a174dd18f17"},
-    {file = "av-16.0.1-cp313-cp313-macosx_11_0_x86_64.whl", hash = "sha256:4c61c6c120f5c5d95c711caf54e2c4a9fb2f1e613ac0a9c273d895f6b2602e44"},
-    {file = "av-16.0.1-cp313-cp313-macosx_14_0_arm64.whl", hash = "sha256:7ecc2e41320c69095f44aff93470a0d32c30892b2dbad0a08040441c81efa379"},
-    {file = "av-16.0.1-cp313-cp313-manylinux_2_28_aarch64.whl", hash = "sha256:036f0554d6faef3f4a94acaeb0cedd388e3ab96eb0eb5a14ec27c17369c466c9"},
-    {file = "av-16.0.1-cp313-cp313-manylinux_2_28_x86_64.whl", hash = "sha256:876415470a62e4a3550cc38db2fc0094c25e64eea34d7293b7454125d5958190"},
-    {file = "av-16.0.1-cp313-cp313-musllinux_1_2_aarch64.whl", hash = "sha256:56902a06bd0828d13f13352874c370670882048267191ff5829534b611ba3956"},
-    {file = "av-16.0.1-cp313-cp313-musllinux_1_2_x86_64.whl", hash = "sha256:fe988c2bf0fc2d952858f791f18377ea4ae4e19ba3504793799cd6c2a2562edf"},
-    {file = "av-16.0.1-cp313-cp313-win_amd64.whl", hash = "sha256:708a66c248848029bf518f0482b81c5803846f1b597ef8013b19c014470b620f"},
-    {file = "av-16.0.1-cp313-cp313t-macosx_11_0_x86_64.whl", hash = "sha256:79a77ee452537030c21a0b41139bedaf16629636bf764b634e93b99c9d5f4558"},
-    {file = "av-16.0.1-cp313-cp313t-macosx_14_0_arm64.whl", hash = "sha256:080823a6ff712f81e7089ae9756fb1512ca1742a138556a852ce50f58e457213"},
-    {file = "av-16.0.1-cp313-cp313t-manylinux_2_28_aarch64.whl", hash = "sha256:04e00124afa8b46a850ed48951ddda61de874407fb8307d6a875bba659d5727e"},
-    {file = "av-16.0.1-cp313-cp313t-manylinux_2_28_x86_64.whl", hash = "sha256:bc098c1c6dc4e7080629a7e9560e67bd4b5654951e17e5ddfd2b1515cfcd37db"},
-    {file = "av-16.0.1-cp313-cp313t-musllinux_1_2_aarch64.whl", hash = "sha256:e6ffd3559a72c46a76aa622630751a821499ba5a780b0047ecc75105d43a6b61"},
-    {file = "av-16.0.1-cp313-cp313t-musllinux_1_2_x86_64.whl", hash = "sha256:7a3f1a36b550adadd7513f4f5ee956f9e06b01a88e59f3150ef5fec6879d6f79"},
-    {file = "av-16.0.1-cp313-cp313t-win_amd64.whl", hash = "sha256:c6de794abe52b8c0be55d8bb09ade05905efa74b1a5ab4860b4b9c2bfb6578bf"},
-    {file = "av-16.0.1-cp314-cp314-macosx_11_0_x86_64.whl", hash = "sha256:4b55ba69a943ae592ad7900da67129422954789de9dc384685d6b529925f542e"},
-    {file = "av-16.0.1-cp314-cp314-macosx_14_0_arm64.whl", hash = "sha256:d4a0c47b6c9bbadad8909b82847f5fe64a608ad392f0b01704e427349bcd9a47"},
-    {file = "av-16.0.1-cp314-cp314-manylinux_2_28_aarch64.whl", hash = "sha256:8bba52f3035708456f6b1994d10b0371b45cfd8f917b5e84ff81aef4ec2f08bf"},
-    {file = "av-16.0.1-cp314-cp314-manylinux_2_28_x86_64.whl", hash = "sha256:08e34c7e7b5e55e29931180bbe21095e1874ac120992bf6b8615d39574487617"},
-    {file = "av-16.0.1-cp314-cp314-musllinux_1_2_aarch64.whl", hash = "sha256:0d6250ab9db80c641b299987027c987f14935ea837ea4c02c5f5182f6b69d9e5"},
-    {file = "av-16.0.1-cp314-cp314-musllinux_1_2_x86_64.whl", hash = "sha256:7b621f28d8bcbb07cdcd7b18943ddc040739ad304545715ae733873b6e1b739d"},
-    {file = "av-16.0.1-cp314-cp314-win_amd64.whl", hash = "sha256:92101f49082392580c9dba4ba2fe5b931b3bb0fb75a1a848bfb9a11ded68be91"},
-    {file = "av-16.0.1-cp314-cp314t-macosx_11_0_x86_64.whl", hash = "sha256:07c464bf2bc362a154eccc82e235ef64fd3aaf8d76fc8ed63d0ae520943c6d3f"},
-    {file = "av-16.0.1-cp314-cp314t-macosx_14_0_arm64.whl", hash = "sha256:750da0673864b669c95882c7b25768cd93ece0e47010d74ebcc29dbb14d611f8"},
-    {file = "av-16.0.1-cp314-cp314t-manylinux_2_28_aarch64.whl", hash = "sha256:0b7c0d060863b2e341d07cd26851cb9057b7979814148b028fb7ee5d5eb8772d"},
-    {file = "av-16.0.1-cp314-cp314t-manylinux_2_28_x86_64.whl", hash = "sha256:e67c2eca6023ca7d76b0709c5f392b23a5defba499f4c262411f8155b1482cbd"},
-    {file = "av-16.0.1-cp314-cp314t-musllinux_1_2_aarch64.whl", hash = "sha256:e3243d54d84986e8fbdc1946db634b0c41fe69b6de35a99fa8b763e18503d040"},
-    {file = "av-16.0.1-cp314-cp314t-musllinux_1_2_x86_64.whl", hash = "sha256:a1bcf73efab5379601e6510abd7afe5f397d0f6defe69b1610c2f37a4a17996b"},
-    {file = "av-16.0.1-cp314-cp314t-win_amd64.whl", hash = "sha256:6368d4ff153d75469d2a3217bc403630dc870a72fe0a014d9135de550d731a86"},
-    {file = "av-16.0.1.tar.gz", hash = "sha256:dd2ce779fa0b5f5889a6d9e00fbbbc39f58e247e52d31044272648fe16ff1dbf"},
+    {file = "av-15.1.0-cp310-cp310-macosx_13_0_arm64.whl", hash = "sha256:cf067b66cee2248220b29df33b60eb4840d9e7b9b75545d6b922f9c41d88c4ee"},
+    {file = "av-15.1.0-cp310-cp310-macosx_13_0_x86_64.whl", hash = "sha256:26426163d96fc3bde9a015ba4d60da09ef848d9284fe79b4ca5e60965a008fc5"},
+    {file = "av-15.1.0-cp310-cp310-manylinux_2_28_aarch64.whl", hash = "sha256:92f524541ce74b8a12491d8934164a5c57e983da24826547c212f60123de400b"},
+    {file = "av-15.1.0-cp310-cp310-manylinux_2_28_x86_64.whl", hash = "sha256:659f9d6145fb2c58e8b31907283b6ba876570f5dd6e7e890d74c09614c436c8e"},
+    {file = "av-15.1.0-cp310-cp310-musllinux_1_2_aarch64.whl", hash = "sha256:07a8ae30c0cfc3132eff320a6b27d18a5e0dda36effd0ae28892888f4ee14729"},
+    {file = "av-15.1.0-cp310-cp310-musllinux_1_2_x86_64.whl", hash = "sha256:e33a76e38f03bb5de026b9f66ccf23dc01ddd2223221096992cb52ac22e62538"},
+    {file = "av-15.1.0-cp310-cp310-win_amd64.whl", hash = "sha256:aa4bf12bdce20edc2a3b13a2776c474c5ab63e1817d53793714504476eeba82e"},
+    {file = "av-15.1.0-cp311-cp311-macosx_13_0_arm64.whl", hash = "sha256:b785948762a8d45fc58fc24a20251496829ace1817e9a7a508a348d6de2182c3"},
+    {file = "av-15.1.0-cp311-cp311-macosx_13_0_x86_64.whl", hash = "sha256:9c7131494a3a318612b4ee4db98fe5bc50eb705f6b6536127c7ab776c524fd8b"},
+    {file = "av-15.1.0-cp311-cp311-manylinux_2_28_aarch64.whl", hash = "sha256:2b9623ae848625c59213b610c8665817924f913580c7c5c91e0dc18936deb00d"},
+    {file = "av-15.1.0-cp311-cp311-manylinux_2_28_x86_64.whl", hash = "sha256:c8ef597087db560514617143532b1fafc4825ebb2dda9a22418f548b113a0cc7"},
+    {file = "av-15.1.0-cp311-cp311-musllinux_1_2_aarch64.whl", hash = "sha256:08eac47a90ebae1e2bd5935f400dd515166019bab4ff5b03c4625fa6ac3a0a5e"},
+    {file = "av-15.1.0-cp311-cp311-musllinux_1_2_x86_64.whl", hash = "sha256:d3f66ff200ea166e606cb3c5cb1bd2fc714effbec2e262a5d67ce60450c8234a"},
+    {file = "av-15.1.0-cp311-cp311-win_amd64.whl", hash = "sha256:57b99544d91121b8bea570e4ddf61700f679a6b677c1f37966bc1a22e1d4cd5c"},
+    {file = "av-15.1.0-cp312-cp312-macosx_13_0_arm64.whl", hash = "sha256:40c5df37f4c354ab8190c6fd68dab7881d112f527906f64ca73da4c252a58cee"},
+    {file = "av-15.1.0-cp312-cp312-macosx_13_0_x86_64.whl", hash = "sha256:af455ce65ada3d361f80c90c810d9bced4db5655ab9aa513024d6c71c5c476d5"},
+    {file = "av-15.1.0-cp312-cp312-manylinux_2_28_aarch64.whl", hash = "sha256:86226d2474c80c3393fa07a9c366106029ae500716098b72b3ec3f67205524c3"},
+    {file = "av-15.1.0-cp312-cp312-manylinux_2_28_x86_64.whl", hash = "sha256:11326f197e7001c4ca53a83b2dbc67fd39ddff8cdf62ce6be3b22d9f3f9338bd"},
+    {file = "av-15.1.0-cp312-cp312-musllinux_1_2_aarch64.whl", hash = "sha256:a631ea879cc553080ee62874f4284765c42ba08ee0279851a98a85e2ceb3cc8d"},
+    {file = "av-15.1.0-cp312-cp312-musllinux_1_2_x86_64.whl", hash = "sha256:8f383949b010c3e731c245f80351d19dc0c08f345e194fc46becb1cb279be3ff"},
+    {file = "av-15.1.0-cp312-cp312-win_amd64.whl", hash = "sha256:d5921aa45f4c1f8c1a8d8185eb347e02aa4c3071278a2e2dd56368d54433d643"},
+    {file = "av-15.1.0-cp313-cp313-macosx_13_0_arm64.whl", hash = "sha256:2f77853c3119c59d1bff4214ccbe46e3133eccff85ed96adee51c68684443f4e"},
+    {file = "av-15.1.0-cp313-cp313-macosx_13_0_x86_64.whl", hash = "sha256:c0bc4471c156a0a1c70a607502434f477bc8dfe085eef905e55b4b0d66bcd3a5"},
+    {file = "av-15.1.0-cp313-cp313-manylinux_2_28_aarch64.whl", hash = "sha256:37839d4fa1407f047af82560dfc0f94d8d6266071eff49e1cbe16c4483054621"},
+    {file = "av-15.1.0-cp313-cp313-manylinux_2_28_x86_64.whl", hash = "sha256:729179cd8622815e8b6f6854d13a806fe710576e08895c77e5e4ad254609de9a"},
+    {file = "av-15.1.0-cp313-cp313-musllinux_1_2_aarch64.whl", hash = "sha256:4abdf085bfa4eec318efccff567831b361ea56c045cc38366811552e3127c665"},
+    {file = "av-15.1.0-cp313-cp313-musllinux_1_2_x86_64.whl", hash = "sha256:f985661644879e4520d28a995fcb2afeb951bc15a1d51412eb8e5f36da85b6fe"},
+    {file = "av-15.1.0-cp313-cp313-win_amd64.whl", hash = "sha256:7d7804a44c8048bb4b014a99353dd124663a12cd1d4613ba2bd3b457c3b1d539"},
+    {file = "av-15.1.0-cp314-cp314-macosx_13_0_arm64.whl", hash = "sha256:5dd73c6447947edcb82e5fecf96e1f146aeda0f169c7ad4c54df4d9f66f63fde"},
+    {file = "av-15.1.0-cp314-cp314-macosx_13_0_x86_64.whl", hash = "sha256:a81cd515934a5d51290aa66b059b7ed29c4a212e704f3c5e99e32877ff1c312c"},
+    {file = "av-15.1.0-cp314-cp314-manylinux_2_28_aarch64.whl", hash = "sha256:57cc7a733a7e7d7a153682f35c9cf5d01e8269367b049c954779de36fc3d0b10"},
+    {file = "av-15.1.0-cp314-cp314-manylinux_2_28_x86_64.whl", hash = "sha256:a77b75bdb6899a64302ff923a5246e0747b3f0a3ecee7d61118db407a22c3f53"},
+    {file = "av-15.1.0-cp314-cp314-musllinux_1_2_aarch64.whl", hash = "sha256:d0a1154ce081f1720082a133cfe12356c59f62dad2b93a7a1844bf1dcd010d85"},
+    {file = "av-15.1.0-cp314-cp314-musllinux_1_2_x86_64.whl", hash = "sha256:8a7bf5a34dee15c86790414fa86a144e6d0dcc788bc83b565fdcbc080b4fbc90"},
+    {file = "av-15.1.0-cp314-cp314-win_amd64.whl", hash = "sha256:e30c9a6fd9734784941384a2e25fad3c22881a7682f378914676aa7e795acdb7"},
+    {file = "av-15.1.0-cp314-cp314t-macosx_13_0_arm64.whl", hash = "sha256:60666833d7e65ebcfc48034a072de74349edbb62c9aaa3e6722fef31ca028eb6"},
+    {file = "av-15.1.0-cp314-cp314t-macosx_13_0_x86_64.whl", hash = "sha256:53fbdae45aa2a49a22e864ff4f4017416ef62c060a172085d3247ba0a101104e"},
+    {file = "av-15.1.0-cp314-cp314t-manylinux_2_28_aarch64.whl", hash = "sha256:e6c51061667983dc801502aff9140bbc4f0e0d97f879586f17fb2f9a7e49c381"},
+    {file = "av-15.1.0-cp314-cp314t-manylinux_2_28_x86_64.whl", hash = "sha256:2f80ec387f04aa34868662b11018b5f09654ae1530a61e24e92a142a24b10b62"},
+    {file = "av-15.1.0-cp314-cp314t-musllinux_1_2_aarch64.whl", hash = "sha256:4975e03177d37d8165c99c8d494175675ba8acb72458fb5d7e43f746a53e0374"},
+    {file = "av-15.1.0-cp314-cp314t-musllinux_1_2_x86_64.whl", hash = "sha256:8f78f3dad11780b4cdd024cdb92ce43cb170929297c00f2f4555c2b103f51e55"},
+    {file = "av-15.1.0-cp314-cp314t-win_amd64.whl", hash = "sha256:9a20c5eba3ec49c2f4b281797021923fc68a86aeb66c5cda4fd0252fa8004951"},
+    {file = "av-15.1.0-cp39-cp39-macosx_13_0_arm64.whl", hash = "sha256:315915f6fef9f9f4935153aed8a81df56690da20f4426ee5b9fa55b4dae4bc0b"},
+    {file = "av-15.1.0-cp39-cp39-macosx_13_0_x86_64.whl", hash = "sha256:4a2a52a56cd8c6a8f0f005d29c3a0ebc1822d31b0d0f39990c4c8e3a69d6c96e"},
+    {file = "av-15.1.0-cp39-cp39-manylinux_2_28_aarch64.whl", hash = "sha256:406fc29103865f17de0f684c5fb2e3d2e43e15c1fa65fcc488f65d20c7a7c7f3"},
+    {file = "av-15.1.0-cp39-cp39-manylinux_2_28_x86_64.whl", hash = "sha256:fe07cf7de162acc09d021e02154b1f760bca742c62609ec0ae586a6a1e0579ac"},
+    {file = "av-15.1.0-cp39-cp39-musllinux_1_2_aarch64.whl", hash = "sha256:9a0c1840959e1742dcd7fa4f7e9b80eea298049542f233e98d6d7a9441ed292c"},
+    {file = "av-15.1.0-cp39-cp39-musllinux_1_2_x86_64.whl", hash = "sha256:46875a57562a72d9b11b4b222628eaf7e5b1a723c4225c869c66d5704634c1d1"},
+    {file = "av-15.1.0-cp39-cp39-win_amd64.whl", hash = "sha256:5f895315ecfe5821a4a3a178cbbe7f62e6a73ae1f726138bef5bb153b2885ed8"},
+    {file = "av-15.1.0.tar.gz", hash = "sha256:39cda2dc810e11c1938f8cb5759c41d6b630550236b3365790e67a313660ec85"},
 ]
 
 [[package]]
@@ -1914,22 +1914,23 @@ types-protobuf = ">=3"
 
 [[package]]
 name = "livekit-agents"
-version = "1.2.14"
+version = "1.2.15"
 description = "A powerful framework for building realtime voice AI agents"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "livekit_agents-1.2.14-py3-none-any.whl", hash = "sha256:505e65db56a1acc1d8d4379712230d5ef72e856331a6cdeb3d8adb9203335608"},
-    {file = "livekit_agents-1.2.14.tar.gz", hash = "sha256:f21b8440c28175d77d4dae06318d649e8ac734b50c2dfc7aa84fe12f6247f184"},
+    {file = "livekit_agents-1.2.15-py3-none-any.whl", hash = "sha256:18aec54c54c806cc1f0f3ba3ed2f46b4612a62262bc36072c7a8c367534c11d2"},
+    {file = "livekit_agents-1.2.15.tar.gz", hash = "sha256:4a2a715242a5076e188cb971cdcfceb4d0c5a998fe6c36cb42a9c304a19f9925"},
 ]
 
 [package.dependencies]
 aiohttp = ">=3.10,<4.0"
 av = [
-    {version = ">=14.0.0"},
-    {version = ">=14.0.0", optional = true, markers = "extra == \"codecs\""},
+    {version = ">=14.0.0,<16"},
+    {version = ">=14.0.0,<16", optional = true, markers = "extra == \"codecs\""},
 ]
+certifi = ">=2025.6.15"
 click = ">=8.1,<9.0"
 colorama = ">=0.4.6"
 docstring-parser = ">=0.16"
@@ -1937,11 +1938,11 @@ eval-type-backport = "*"
 livekit = ">=1.0.12,<2"
 livekit-api = ">=1.0.5,<2"
 livekit-blingfire = ">=1.0,<2.0"
-livekit-plugins-gladia = {version = ">=1.2.14", optional = true, markers = "extra == \"gladia\""}
-livekit-plugins-lmnt = {version = ">=1.2.14", optional = true, markers = "extra == \"lmnt\""}
-livekit-plugins-openai = {version = ">=1.2.14", optional = true, markers = "extra == \"openai\""}
-livekit-plugins-silero = {version = ">=1.2.14", optional = true, markers = "extra == \"silero\""}
-livekit-plugins-turn-detector = {version = ">=1.2.14", optional = true, markers = "extra == \"turn-detector\""}
+livekit-plugins-gladia = {version = ">=1.2.15", optional = true, markers = "extra == \"gladia\""}
+livekit-plugins-lmnt = {version = ">=1.2.15", optional = true, markers = "extra == \"lmnt\""}
+livekit-plugins-openai = {version = ">=1.2.15", optional = true, markers = "extra == \"openai\""}
+livekit-plugins-silero = {version = ">=1.2.15", optional = true, markers = "extra == \"silero\""}
+livekit-plugins-turn-detector = {version = ">=1.2.15", optional = true, markers = "extra == \"turn-detector\""}
 livekit-protocol = ">=1.0,<2.0"
 nest-asyncio = ">=1.6.0"
 numpy = ">=1.26.0"
@@ -1961,51 +1962,51 @@ typing-extensions = ">=4.12"
 watchfiles = ">=1.0"
 
 [package.extras]
-anam = ["livekit-plugins-anam (>=1.2.14)"]
-anthropic = ["livekit-plugins-anthropic (>=1.2.14)"]
-assemblyai = ["livekit-plugins-assemblyai (>=1.2.14)"]
-aws = ["livekit-plugins-aws (>=1.2.14)"]
-azure = ["livekit-plugins-azure (>=1.2.14)"]
-baseten = ["livekit-plugins-baseten (>=1.2.14)"]
-bey = ["livekit-plugins-bey (>=1.2.14)"]
-bithuman = ["livekit-plugins-bithuman (>=1.2.14)"]
-cartesia = ["livekit-plugins-cartesia (>=1.2.14)"]
-clova = ["livekit-plugins-clova (>=1.2.14)"]
+anam = ["livekit-plugins-anam (>=1.2.15)"]
+anthropic = ["livekit-plugins-anthropic (>=1.2.15)"]
+assemblyai = ["livekit-plugins-assemblyai (>=1.2.15)"]
+aws = ["livekit-plugins-aws (>=1.2.15)"]
+azure = ["livekit-plugins-azure (>=1.2.15)"]
+baseten = ["livekit-plugins-baseten (>=1.2.15)"]
+bey = ["livekit-plugins-bey (>=1.2.15)"]
+bithuman = ["livekit-plugins-bithuman (>=1.2.15)"]
+cartesia = ["livekit-plugins-cartesia (>=1.2.15)"]
+clova = ["livekit-plugins-clova (>=1.2.15)"]
 codecs = ["av (>=12.0.0)", "numpy (>=1.26.0)"]
-deepgram = ["livekit-plugins-deepgram (>=1.2.14)"]
-elevenlabs = ["livekit-plugins-elevenlabs (>=1.2.14)"]
-fal = ["livekit-plugins-fal (>=1.2.14)"]
-fireworksai = ["livekit-plugins-fireworksai (>=1.2.14)"]
-gladia = ["livekit-plugins-gladia (>=1.2.14)"]
-google = ["livekit-plugins-google (>=1.2.14)"]
-groq = ["livekit-plugins-groq (>=1.2.14)"]
-hedra = ["livekit-plugins-hedra (>=1.2.14)"]
-hume = ["livekit-plugins-hume (>=1.2.14)"]
+deepgram = ["livekit-plugins-deepgram (>=1.2.15)"]
+elevenlabs = ["livekit-plugins-elevenlabs (>=1.2.15)"]
+fal = ["livekit-plugins-fal (>=1.2.15)"]
+fireworksai = ["livekit-plugins-fireworksai (>=1.2.15)"]
+gladia = ["livekit-plugins-gladia (>=1.2.15)"]
+google = ["livekit-plugins-google (>=1.2.15)"]
+groq = ["livekit-plugins-groq (>=1.2.15)"]
+hedra = ["livekit-plugins-hedra (>=1.2.15)"]
+hume = ["livekit-plugins-hume (>=1.2.15)"]
 images = ["pillow (>=10.3.0)"]
-inworld = ["livekit-plugins-inworld (>=1.2.14)"]
-langchain = ["livekit-plugins-langchain (>=1.2.14)"]
-lmnt = ["livekit-plugins-lmnt (>=1.2.14)"]
+inworld = ["livekit-plugins-inworld (>=1.2.15)"]
+langchain = ["livekit-plugins-langchain (>=1.2.15)"]
+lmnt = ["livekit-plugins-lmnt (>=1.2.15)"]
 mcp = ["mcp (>=1.10.0,<2) ; python_version >= \"3.10\""]
-minimax = ["livekit-plugins-minimax (>=1.2.14)"]
-mistralai = ["livekit-plugins-mistralai (>=1.2.14)"]
-neuphonic = ["livekit-plugins-neuphonic (>=1.2.14)"]
-nltk = ["livekit-plugins-nltk (>=1.2.14)"]
-openai = ["livekit-plugins-openai (>=1.2.14)"]
-playai = ["livekit-plugins-playai (>=1.2.14)"]
-resemble = ["livekit-plugins-resemble (>=1.2.14)"]
-rime = ["livekit-plugins-rime (>=1.2.14)"]
-sarvam = ["livekit-plugins-sarvam (>=1.2.14)"]
-silero = ["livekit-plugins-silero (>=1.2.14)"]
-simli = ["livekit-plugins-simli (>=1.2.14)"]
-smallestai = ["livekit-plugins-smallestai (>=1.2.14)"]
-soniox = ["livekit-plugins-soniox (>=1.2.14)"]
-speechify = ["livekit-plugins-speechify (>=1.2.14)"]
-speechmatics = ["livekit-plugins-speechmatics (>=1.2.14)"]
-spitch = ["livekit-plugins-spitch (>=1.2.14)"]
-tavus = ["livekit-plugins-tavus (>=1.2.14)"]
-turn-detector = ["livekit-plugins-turn-detector (>=1.2.14)"]
-ultravox = ["livekit-plugins-ultravox (>=1.2.14)"]
-upliftai = ["livekit-plugins-upliftai (>=1.2.14)"]
+minimax = ["livekit-plugins-minimax (>=1.2.15)"]
+mistralai = ["livekit-plugins-mistralai (>=1.2.15)"]
+neuphonic = ["livekit-plugins-neuphonic (>=1.2.15)"]
+nltk = ["livekit-plugins-nltk (>=1.2.15)"]
+openai = ["livekit-plugins-openai (>=1.2.15)"]
+playai = ["livekit-plugins-playai (>=1.2.15)"]
+resemble = ["livekit-plugins-resemble (>=1.2.15)"]
+rime = ["livekit-plugins-rime (>=1.2.15)"]
+sarvam = ["livekit-plugins-sarvam (>=1.2.15)"]
+silero = ["livekit-plugins-silero (>=1.2.15)"]
+simli = ["livekit-plugins-simli (>=1.2.15)"]
+smallestai = ["livekit-plugins-smallestai (>=1.2.15)"]
+soniox = ["livekit-plugins-soniox (>=1.2.15)"]
+speechify = ["livekit-plugins-speechify (>=1.2.15)"]
+speechmatics = ["livekit-plugins-speechmatics (>=1.2.15)"]
+spitch = ["livekit-plugins-spitch (>=1.2.15)"]
+tavus = ["livekit-plugins-tavus (>=1.2.15)"]
+turn-detector = ["livekit-plugins-turn-detector (>=1.2.15)"]
+ultravox = ["livekit-plugins-ultravox (>=1.2.15)"]
+upliftai = ["livekit-plugins-upliftai (>=1.2.15)"]
 
 [[package]]
 name = "livekit-api"
@@ -2063,35 +2064,35 @@ files = [
 
 [[package]]
 name = "livekit-plugins-gladia"
-version = "1.2.14"
+version = "1.2.15"
 description = "Agent Framework plugin for services using Gladia's API."
 optional = false
 python-versions = ">=3.9.0"
 groups = ["main"]
 files = [
-    {file = "livekit_plugins_gladia-1.2.14-py3-none-any.whl", hash = "sha256:a9903c26079855f4a9f88b82b53bafc6a4b6e7c61955227cf2edda47c5499287"},
-    {file = "livekit_plugins_gladia-1.2.14.tar.gz", hash = "sha256:c08392bf951b5878879572deb438a18ded98ee491cb27176e76f577feb04fc56"},
+    {file = "livekit_plugins_gladia-1.2.15-py3-none-any.whl", hash = "sha256:e43ff5760406fc1e6fb1fb8a887c1a2ee16020876f43f3074a4ef3faa1030dcc"},
+    {file = "livekit_plugins_gladia-1.2.15.tar.gz", hash = "sha256:9a41d5731cab73e0a43461a25c31244cd3d4db6f6641745e692e17fbd7ade4c7"},
 ]
 
 [package.dependencies]
 aiohttp = ">=3.8.0"
-livekit-agents = {version = ">=1.2.14", extras = ["codecs"]}
+livekit-agents = {version = ">=1.2.15", extras = ["codecs"]}
 numpy = ">=1.26"
 
 [[package]]
 name = "livekit-plugins-lmnt"
-version = "1.2.14"
+version = "1.2.15"
 description = "LMNT TTS plugin for LiveKit agents"
 optional = false
 python-versions = ">=3.9.0"
 groups = ["main"]
 files = [
-    {file = "livekit_plugins_lmnt-1.2.14-py3-none-any.whl", hash = "sha256:fdfa6657ba33302762dec180ceb64583105096a3e29b068100b16c97863bfae2"},
-    {file = "livekit_plugins_lmnt-1.2.14.tar.gz", hash = "sha256:58c25d8efdf2569b32d43e3123bc724b492f67b571d164020b3eeb78b6e1d2dc"},
+    {file = "livekit_plugins_lmnt-1.2.15-py3-none-any.whl", hash = "sha256:3120c7be922be90ebe2cda6cb362d0a0364544ff95bbff8bce260ef141c5ba4a"},
+    {file = "livekit_plugins_lmnt-1.2.15.tar.gz", hash = "sha256:015a32a8f782962128f9d07bd0b719f0ba79eeaad3f5b5b6ae1c4fd0df5f0728"},
 ]
 
 [package.dependencies]
-livekit-agents = ">=1.2.14"
+livekit-agents = ">=1.2.15"
 
 [[package]]
 name = "livekit-plugins-noise-cancellation"
@@ -2113,18 +2114,18 @@ livekit = ">=0.21.3"
 
 [[package]]
 name = "livekit-plugins-openai"
-version = "1.2.14"
+version = "1.2.15"
 description = "Agent Framework plugin for services from OpenAI"
 optional = false
 python-versions = ">=3.9.0"
 groups = ["main"]
 files = [
-    {file = "livekit_plugins_openai-1.2.14-py3-none-any.whl", hash = "sha256:b80e2c7c1a932dbb968c665df4f1cab5e16b8b9bb0620e72f88936ea4ca7edfb"},
-    {file = "livekit_plugins_openai-1.2.14.tar.gz", hash = "sha256:70297df328878406abcd4eb680ad9ea770ae1a92be8bc590907f0ee364e65b00"},
+    {file = "livekit_plugins_openai-1.2.15-py3-none-any.whl", hash = "sha256:3875e7ed2d72487b7301566af5252a6216e847e8e2228300c416c88d1acce5b9"},
+    {file = "livekit_plugins_openai-1.2.15.tar.gz", hash = "sha256:2adf84e32684469a40e9aec3efa18a32de07bafb00a6da225baba0fcb4028e95"},
 ]
 
 [package.dependencies]
-livekit-agents = {version = ">=1.2.14", extras = ["codecs", "images"]}
+livekit-agents = {version = ">=1.2.15", extras = ["codecs", "images"]}
 openai = {version = ">=1.107.2", extras = ["realtime"]}
 
 [package.extras]
@@ -2132,36 +2133,36 @@ vertex = ["google-auth (>=2.0.0)"]
 
 [[package]]
 name = "livekit-plugins-silero"
-version = "1.2.14"
+version = "1.2.15"
 description = "Agent Framework Plugin for Silero"
 optional = false
 python-versions = ">=3.9.0"
 groups = ["main"]
 files = [
-    {file = "livekit_plugins_silero-1.2.14-py3-none-any.whl", hash = "sha256:b4a7dd4b61d1120c2bff6816e1716826d15d563f3d6e1acbad9a831acb281d31"},
-    {file = "livekit_plugins_silero-1.2.14.tar.gz", hash = "sha256:72a6802927beabf594522327d310e8e01f403766b4f4051f9ecc100203c5b2dd"},
+    {file = "livekit_plugins_silero-1.2.15-py3-none-any.whl", hash = "sha256:a6e2459a6ed063d48d29d9bc111806e13d8452a01260495cf5d9f506d1cde29f"},
+    {file = "livekit_plugins_silero-1.2.15.tar.gz", hash = "sha256:68508aad5c4b050ef952c2a32fe239c5209ced2ca24cbcabcef821ecd872ed07"},
 ]
 
 [package.dependencies]
-livekit-agents = ">=1.2.14"
+livekit-agents = ">=1.2.15"
 numpy = ">=1.26"
 onnxruntime = ">=1.18"
 
 [[package]]
 name = "livekit-plugins-turn-detector"
-version = "1.2.14"
+version = "1.2.15"
 description = "End of utterance detection for LiveKit Agents"
 optional = false
 python-versions = ">=3.9.0"
 groups = ["main"]
 files = [
-    {file = "livekit_plugins_turn_detector-1.2.14-py3-none-any.whl", hash = "sha256:5e4e819f65d2b14e3e0eb852a52623e4722bb247d60e841457f2b878c87ad5c8"},
-    {file = "livekit_plugins_turn_detector-1.2.14.tar.gz", hash = "sha256:d4284e28c93cf485ecad3e235e4eb99389014531a5d07a91a539486aae1d29c7"},
+    {file = "livekit_plugins_turn_detector-1.2.15-py3-none-any.whl", hash = "sha256:c5ccf91c71dab7cf263fd72fe732159657066afb7cf24488e24ed50cba659907"},
+    {file = "livekit_plugins_turn_detector-1.2.15.tar.gz", hash = "sha256:194adf089cb5e291a851466d78144d92c8b964cff5601210477775a5373ec3b1"},
 ]
 
 [package.dependencies]
 jinja2 = "*"
-livekit-agents = ">=1.2.14"
+livekit-agents = ">=1.2.15"
 numpy = ">=1.26"
 onnxruntime = ">=1.18"
 transformers = ">=4.47.1"
@@ -5518,4 +5519,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<3.11"
-content-hash = "1ed41affedaaaf0c206ad0bac90dbe452918e88bc21d7b863a87c291fa787e2d"
+content-hash = "435a1888b435d50379af88bba0e78919bc67e506cfb8260a07154014201a16c8"
