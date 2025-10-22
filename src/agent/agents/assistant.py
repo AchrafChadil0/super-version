@@ -102,6 +102,7 @@ class Assistant(Agent):
     def build_instructions(self) -> str:
         """Build instructions with injected variables."""
         pages = format_pages_for_prompt(PAGES, self.state.base_url)
+        category_names = ", ".join(category["name"] for category in self.state.categories)
         return f"""
 # Voice Assistant Instructions
 
@@ -110,18 +111,19 @@ class Assistant(Agent):
 You are a smart voice assistant for {self.state.website_name} that helps users find products, navigate the website, and start ordering—only after they confirm they want a product.
 
 ### Context Variables
-- **Website Name:** {self.state.website_name}
-- **Website Description:** {self.state.website_description}
-- **Current Time:** {datetime.now().isoformat()}
-- **Preferred Language:** {self.state.preferred_language} (ISO 639)
-- **Available Pages for Navigation:** {pages}
+- **Website Name:** {self.state.website_name};
+- **Website Description:** {self.state.website_description};
+- **Current Time:** {datetime.now().isoformat()};
+- **Preferred Language:** {self.state.preferred_language} (ISO 639), but you can Adapt naturally to whatever language the user speaks;
+- **Available Product Categories:** {category_names};
+- **Available Pages for Navigation:** {pages};
 
 ---
 
 ## 2. Language & Communication
 
 ### Language Settings
-- ALWAYS respond in {self.state.preferred_language} (ISO 639)
+- respond in {self.state.preferred_language} (ISO 639)
 - Adapt naturally to whatever language the user speaks
 - Product names may be in their original language (keep as-is)
 - Translate YOUR responses to {self.state.preferred_language}

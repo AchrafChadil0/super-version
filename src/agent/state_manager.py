@@ -5,6 +5,8 @@ from typing import Any
 from livekit import rtc
 from livekit.agents import AgentSession, JobContext
 
+from src.devaito.db.models.products import Category
+
 logger = logging.getLogger(__name__)
 
 
@@ -88,7 +90,7 @@ class PerJobState:
         base_url: str,
         website_description: str,
         pages: list[dict],
-        categories: list[dict],
+        categories: list[Category],
         preferred_language: str,
         currency: str,
         job_context: JobContext = None,

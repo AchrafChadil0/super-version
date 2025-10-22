@@ -1,6 +1,7 @@
 from sqlalchemy import text
 
 from src.devaito.config.cache_config import tenant_cached
+from src.devaito.db.models.products import Category
 from src.devaito.db.session import get_async_session
 from src.devaito.repositories.products import (
     get_all_products_for_vector,
@@ -9,6 +10,7 @@ from src.devaito.repositories.products import (
     get_customizable_product_detail_by_id,
     get_product_by_id,
     get_product_for_vector_by_id,
+    get_all_categories
 )
 from src.devaito.schemas.products import (
     BasicSingleProductDetailDict,
@@ -130,3 +132,18 @@ async def get_all_products_for_vectors(
     async with get_async_session(tenant_id) as db:
         products = await get_all_products_for_vector(db)
         return [product.to_dict() for product in products]
+
+@tenant_cached(ttl=1000)
+async def get_tenant_categories(
+    tenant_id: str,
+)->list[Category]:
+    """Get product for vector by product ID.
+    Args:
+        tenant_id: The tenant identifier
+
+    Returns:
+        Dictionary with category info for vector operations, or Empty list if not found
+    """
+    async with get_async_session(tenant_id) as db:
+        categories = await get_all_categories(db)
+        return [category.to_dict() for category in categories]

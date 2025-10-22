@@ -20,6 +20,7 @@ from src.core.agent_session_config import (
 from src.core.config import Config
 from src.data.db_to_vector import sync_products_to_vector_store
 from src.data.vector_store import VectorStore
+from src.devaito.services.products import get_tenant_categories
 from src.utils.tools import add_https_to_hostname
 
 setup_logging(log_level="INFO", log_dir="logs")
@@ -105,6 +106,7 @@ async def entrypoint(ctx: agents.JobContext):
         turn_detection=MultilingualModel(),
     )
     base_url = add_https_to_hostname(hostname)
+    categories = await get_tenant_categories(database_name)
     state = PerJobState(
         room=ctx.room,
         session=session,
@@ -115,7 +117,7 @@ async def entrypoint(ctx: agents.JobContext):
         preferred_language=preferred_language,
         job_context=ctx,
         currency=currency,
-        categories=[],
+        categories=categories,
         pages=[],
     )
     agent = Assistant(state=state)
@@ -154,8 +156,8 @@ async def entrypoint(ctx: agents.JobContext):
     )
 
     await session.generate_reply(
-        instructions=f"""Always start by saying 'Welcome to {website_name}! How can I assist you today? in user's preferred language.'
-               Communicate to the users in their preferred language (here is the 2 letter language ISO 639): {preferred_language}
+        instructions=f"""Always start by saying 'Welcome to {website_name}! How can I assist you today? in user's preferred language. {preferred_language}'
+               adapt naturally to the user's language and speaking style, if the user want to speak another lang other then preferred lang speak it.
                """,
     )
 

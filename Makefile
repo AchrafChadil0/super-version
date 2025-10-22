@@ -22,5 +22,7 @@ download:
 
 api:
 	 uvicorn src.core.api:app --host 0.0.0.0 --port 8001
+oapi:
+	uvicorn src.devaito.main:app --host 0.0.0.0 --port 8002
 server:
 	python -m src.core.server
