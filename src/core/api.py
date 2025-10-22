@@ -176,17 +176,26 @@ async def search_products(
     query: str,
     website_name: str,
     limit: int = 5,
+    manager_restaurant: bool = False
 ):
     """Search for products in the vector store"""
     try:
-        store = get_vector_store_instance(
-            database_name=website_name
-        )  # Create new instance
+        store = get_vector_store_instance(database_name=website_name)
+
+        # 🔹 Augmenter temporairement le nombre de résultats pour filtrage
+        search_limit = limit * 3 if manager_restaurant else limit
 
         results = store.search_products(
             query=query,
-            n_results=limit,
+            n_results=search_limit,
         )
+
+        # 🔹 Filtrage côté Python
+        if manager_restaurant:
+            results = [
+                r for r in results
+                if r.get("metadata", {}).get("product_type") != "basic"
+            ][:limit]  # on coupe à la limite finale
 
         return {
             "success": True,

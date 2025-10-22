@@ -185,26 +185,31 @@ class VectorStore:
         self,
         query: str,
         n_results: int = 5,
+        filter: dict | None = None,  # ✅ Ajouter le paramètre filter
     ) -> list[VectorProductSearchResult]:
         """
-        Search for products using semantic similarity
+        Search for products using semantic similarity, with optional filtering
 
         Args:
             query: Search query text
             n_results: Number of results to return
+            filter: Optional dict for filtering, ex: {"product_type": {"$ne": "basic"}}
 
         Returns:
             List of matching products with scores
         """
         try:
-            # Perform semantic search without any filters
+            # 🔹 Augmenter temporairement le nombre de résultats pour filtrage
+            search_limit = n_results
+            if filter and "product_type" in filter and "$ne" in filter["product_type"]:
+                search_limit = n_results * 3  # chercher plus pour avoir assez après filtrage
+
             results = self.collection.query(
                 query_texts=[query],
-                n_results=min(n_results, self.collection.count()),
+                n_results=min(search_limit, self.collection.count()),
                 include=["metadatas", "distances", "documents"],
             )
 
-            # Process results
             products = []
             if results and results["metadatas"] and results["metadatas"][0]:
                 for i, metadata in enumerate(results["metadatas"][0]):
@@ -221,14 +226,19 @@ class VectorStore:
                     categories = json.loads(value)
 
                     # Add similarity score (convert distance to similarity)
-                    distance = (
-                        results["distances"][0][i] if results["distances"] else 1.0
-                    )
-                    similarity_score = 1.0 / (1.0 + distance)  # Convert to 0-1 scale
+                    distance = results["distances"][0][i] if results["distances"] else 1.0
+                    similarity_score = 1.0 / (1.0 + distance)
 
                     # Add parsed categories back to product
                     if "metadata" in full_product:
                         full_product["metadata"]["categories"] = categories
+
+                    # 🔹 Appliquer le filtre ici
+                    if filter:
+                        if "product_type" in filter and "$ne" in filter["product_type"]:
+                            exclude_type = filter["product_type"]["$ne"]
+                            if full_product.get("metadata", {}).get("product_type") == exclude_type:
+                                continue
 
                     products.append(
                         {
@@ -238,8 +248,8 @@ class VectorStore:
                         }
                     )
 
-            logger.info(f"Found {len(products)} products for query: '{query}'")
-            return products[:n_results]  # Ensure we don't return more than requested
+            # Limiter au nombre de résultats demandé
+            return products[:n_results]
 
         except Exception as e:
             logger.error(f"Error searching products: {e}")
