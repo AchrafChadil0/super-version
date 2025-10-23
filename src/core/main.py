@@ -100,7 +100,7 @@ async def entrypoint(ctx: agents.JobContext):
     session_config = AgentIntimeSessionConfig()
     session = AgentSession(
         llm=openai.LLM(model=session_config.model_name),
-        tts=openai.TTS(model=session_config.tts_model, voice=session_config.voice),
+        tts=openai.TTS(model=session_config.tts_model, voice=session_config.voice, speed=1.2),
         stt=gladia.STT(),
         vad=ctx.proc.userdata["vad"],
         turn_detection=MultilingualModel(),
