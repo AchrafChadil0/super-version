@@ -8,7 +8,7 @@ authors = [
 readme = "README.md"
 requires-python = ">=3.10,<3.11"
 dependencies = [
-    "livekit-agents[openai,silero,turn-detector, gladia, lmnt] (==1.2.15)",
+    "livekit-agents[openai,silero,turn-detector, gladia ] (==1.2.15)",
     "livekit-plugins-noise-cancellation (>=0.2,<1.0)",
     "python-dotenv (>=1.1.1,<2.0.0)",
     "pre-commit (>=4.3.0,<5.0.0)",

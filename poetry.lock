@@ -1941,6 +1941,8 @@ livekit-blingfire = ">=1.0,<2.0"
 livekit-plugins-gladia = {version = ">=1.2.15", optional = true, markers = "extra == \"gladia\""}
 livekit-plugins-lmnt = {version = ">=1.2.15", optional = true, markers = "extra == \"lmnt\""}
 livekit-plugins-openai = {version = ">=1.2.15", optional = true, markers = "extra == \"openai\""}
+livekit-plugins-resemble = {version = ">=1.2.15", optional = true, markers = "extra == \"resemble\""}
+livekit-plugins-rime = {version = ">=1.2.15", optional = true, markers = "extra == \"rime\""}
 livekit-plugins-silero = {version = ">=1.2.15", optional = true, markers = "extra == \"silero\""}
 livekit-plugins-turn-detector = {version = ">=1.2.15", optional = true, markers = "extra == \"turn-detector\""}
 livekit-protocol = ">=1.0,<2.0"
@@ -2130,6 +2132,36 @@ openai = {version = ">=1.107.2", extras = ["realtime"]}
 
 [package.extras]
 vertex = ["google-auth (>=2.0.0)"]
+
+[[package]]
+name = "livekit-plugins-resemble"
+version = "1.2.15"
+description = "LiveKit Agents Plugin for Resemble AI"
+optional = false
+python-versions = ">=3.9.0"
+groups = ["main"]
+files = [
+    {file = "livekit_plugins_resemble-1.2.15-py3-none-any.whl", hash = "sha256:ee2b7c89bd2a358c89131858c634f3653548b6e6d29c750b023820206c70f96a"},
+    {file = "livekit_plugins_resemble-1.2.15.tar.gz", hash = "sha256:cf127440b9ff9eb27c9324e24d81e27268139ee6dd1eda643fb0a15b96578203"},
+]
+
+[package.dependencies]
+livekit-agents = ">=1.2.15"
+
+[[package]]
+name = "livekit-plugins-rime"
+version = "1.2.15"
+description = "LiveKit Agents Plugin for Rime"
+optional = false
+python-versions = ">=3.9.0"
+groups = ["main"]
+files = [
+    {file = "livekit_plugins_rime-1.2.15-py3-none-any.whl", hash = "sha256:02d4ac75582069d6a324ad5c3c0acc737b616e007aefcf1c4d4cd39c45ad816e"},
+    {file = "livekit_plugins_rime-1.2.15.tar.gz", hash = "sha256:0f5ecb914a59a3aed848fada3c1c5299ad870b8a6831be600a726eb6953e3184"},
+]
+
+[package.dependencies]
+livekit-agents = {version = ">=1.2.15", extras = ["codecs"]}
 
 [[package]]
 name = "livekit-plugins-silero"
@@ -5519,4 +5551,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<3.11"
-content-hash = "435a1888b435d50379af88bba0e78919bc67e506cfb8260a07154014201a16c8"
+content-hash = "369b8dd103bdd37a1ab76e805134684574ad275305842ca2042fa7813382fe18"

@@ -6,7 +6,7 @@ import time
 
 from livekit import agents
 from livekit.agents import AgentSession, RoomInputOptions, RoomOutputOptions, MetricsCollectedEvent, metrics
-from livekit.plugins import noise_cancellation, openai, silero
+from livekit.plugins import noise_cancellation, openai, silero, gladia
 from livekit.plugins.turn_detector.multilingual import MultilingualModel
 from livekit.agents.telemetry import set_tracer_provider
 
@@ -101,7 +101,7 @@ async def entrypoint(ctx: agents.JobContext):
     session = AgentSession(
         llm=openai.LLM(model=session_config.model_name),
         tts=openai.TTS(model=session_config.tts_model, voice=session_config.voice),
-        stt=openai.STT(model=session_config.stt_model),
+        stt=gladia.STT(),
         vad=ctx.proc.userdata["vad"],
         turn_detection=MultilingualModel(),
     )
@@ -136,8 +136,8 @@ async def entrypoint(ctx: agents.JobContext):
     session.userdata = state
 
     # by default, we disable the audio
-    session.input.set_audio_enabled(False)
-    session.output.set_audio_enabled(False)
+    session.input.set_audio_enabled(True)
+    session.output.set_audio_enabled(True)
 
     available_modes = ["text", "voice"]
 
