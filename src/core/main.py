@@ -173,7 +173,7 @@ async def entrypoint(ctx: agents.JobContext):
     )
 
     await session.generate_reply(
-        instructions=f"""Always start by saying 'Welcome to {website_name}! How can I assist you today? in user's preferred language. {preferred_language}'
+        instructions=f"""Always start by saying 'Welcome to {website_name}! How can I assist you today?'
                adapt naturally to the user's language and speaking style, if the user want to speak another lang other then preferred lang speak it.
                """,
     )
