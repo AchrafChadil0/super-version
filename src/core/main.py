@@ -6,7 +6,7 @@ import time
 
 from livekit import agents
 from livekit.agents import AgentSession, RoomInputOptions, RoomOutputOptions, MetricsCollectedEvent, metrics
-from livekit.plugins import noise_cancellation, openai, silero, gladia, lmnt
+from livekit.plugins import noise_cancellation, openai, silero
 from livekit.plugins.turn_detector.multilingual import MultilingualModel
 from livekit.agents.telemetry import set_tracer_provider
 
@@ -106,7 +106,11 @@ async def entrypoint(ctx: agents.JobContext):
         turn_detection=MultilingualModel(),
     )
     base_url = add_https_to_hostname(hostname)
-    categories = await get_tenant_categories(database_name)
+    try:
+        categories = await get_tenant_categories(database_name)
+    except Exception as e:
+        logger.error(f"Failed to fetch categories for DB '{database_name}': {e}")
+        categories = []
     state = PerJobState(
         room=ctx.room,
         session=session,
