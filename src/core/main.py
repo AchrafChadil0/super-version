@@ -136,8 +136,8 @@ async def entrypoint(ctx: agents.JobContext):
     session.userdata = state
 
     # by default, we disable the audio
-    session.input.set_audio_enabled(True)
-    session.output.set_audio_enabled(True)
+    session.input.set_audio_enabled(False)
+    session.output.set_audio_enabled(False)
 
     available_modes = ["text", "voice"]
 
